@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import { Card, Button } from 'antd'
+import { connect } from 'dva'
 import styles from './index.less'
 
 export default class CommodityList extends PureComponent {
@@ -10,28 +11,34 @@ export default class CommodityList extends PureComponent {
         }
     }
     componentWillReceiveProps(nextProps) {
-        console.log(nextProps)
-        if (nextProps.content) {
+        if (nextProps.content && !this.state.hasReceiveProps) {
             const content = nextProps.content
-            this.setState({content})
+            this.setState({content, hasReceiveProps: true})
         }
     }
     handleClick = (key) => {
         const { content } = this.state
         const newContent = content.map(item => {
             if (item.Key === key) {
-                return { ...item, dataClicked: "true" }
+                return { ...item, dataClicked: null }
             }
             return item
         })
-        // this.setState({content: newContent}, () => {
-        //
-        // })
+        this.setState({ content: newContent })
+        setTimeout(() => {
+            const newContent = this.state.content.map(item => {
+                if (item.Key === key) {
+                    return { ...item, dataClicked: "true" }
+                }
+                return item
+            })
+            this.setState({content: newContent})
+        }, 0)
+        this.props.dispatch({ type: 'commodity/addToSelectedGoods', payload: key })
     }
     render() {
-        console.log(this.state.content)
         const { content } = this.state
-        const commodityItem = ({Name, Price, Image, Key, dataClicked}) => (
+        const commodityItem = ({Name, UnitPrice, Image, Key, dataClicked}) => (
             <Card
                 key={Key}
                 className={styles.commodityItem}
@@ -44,7 +51,7 @@ export default class CommodityList extends PureComponent {
                     <img src={Image} alt="商品图片" />
                 </div>
                 <div className={styles.commodityName}>{Name}</div>
-                <span className={styles.priceTag}>{Price}</span>
+                <span className={styles.priceTag}>{UnitPrice}</span>
             </div>
         </Card>
         )

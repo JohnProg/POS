@@ -39,7 +39,7 @@
             color: initial;
             border-color: @border-color;
         }
-        &[dataType="string"] {
+        &[datatype="string"] {
             padding: 0;
             font-size: 14px;
         }
@@ -49,11 +49,19 @@
     width: 199px;
     display: flex;
     flex-direction: column;
-    button:first-child {
+    div:first-child {
         height: 57px;
+        button {
+            height: 100%;
+            width: 100%;
+        }
     }
-    button:last-child {
+    div:last-child {
         height: 171px;
+        button {
+            height: 100%;
+            width: 100%;
+        }
     }
 }
 .numPad {
@@ -79,4 +87,8 @@
     opacity: 0;
     transform: scale(50, 50);
   }
+}
+.activeButton {
+    background-color: #6EC89B !important;
+    color: #fff !important;
 }

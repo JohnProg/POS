@@ -1,31 +1,32 @@
 import React from 'react';
 import PropTypes from 'prop-types'
-import styles from './Cbutton.less'
 import { Button } from 'antd'
 
-class Cbutton extends React.Component {
+export default class Cbutton extends React.Component {
+    static propTypes =  {
+        name: PropTypes.string,
+        clickHandler: PropTypes.func
+    }
+
   handleClick = () => {
     this.props.clickHandler(this.props.name);
   }
 
   render() {
-    let className = styles.buttonWrapper
+      const { name, datatype, className } = this.props
 
     return (
-      <div
-        className={className}
-      >
+      <div>
         <Button
           onClick={this.handleClick}
+          name={name}
+          datatype={datatype}
+          className={className}
+          ghost
         >
-          {this.props.name}
+            {this.props.children}
         </Button>
       </div>
     );
   }
 }
-Button.propTypes = {
-  name: React.PropTypes.string,
-  clickHandler: React.PropTypes.func,
-};
-export default Cbutton;

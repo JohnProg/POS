@@ -1,34 +1,50 @@
 import React, { PureComponent } from 'react';
-import { Button } from 'antd'
 import styles from './index.less'
+import { connect } from 'dva'
+import Cbutton from '../Cbutton'
+import calculate from './logic/calculate'
 
-export default class ChooseCalculator extends PureComponent {
+
+class ChooseCalculator extends PureComponent {
+    clickHandler = (buttonName) => {
+        calculate(this.props.commodity, this.props.dispatch, buttonName)
+    }
     render() {
+        const { orders, activeTabKey } = this.props
+        const currentOrder = Array.isArray(orders) && orders.filter(item => (item.key === activeTabKey))[0] || {}
+        const { selectedList = [], activeKey } = currentOrder
+        const selectedItem = selectedList.filter(item => item.Key === activeKey)[0] || {}
+        const calculateType = selectedItem.CalculateType
         return (
             <div className={styles.calcWrapper}>
                 <div className={styles.actionPad}>
-                    <Button>客户</Button>
-                    <Button>付款</Button>
+                    <Cbutton name="customer">客户</Cbutton>
+                    <Cbutton name="payment">付款</Cbutton>
                 </div>
                 <div className={styles.numPad}>
-                    <Button ghost>1</Button>
-                    <Button ghost>2</Button>
-                    <Button ghost>3</Button>
-                    <Button ghost datatype="string">数量</Button>
-                    <Button ghost>4</Button>
-                    <Button ghost>5</Button>
-                    <Button ghost>6</Button>
-                    <Button ghost datatype="string">折扣</Button>
-                    <Button ghost>7</Button>
-                    <Button ghost>8</Button>
-                    <Button ghost>9</Button>
-                    <Button ghost datatype="string">价格</Button>
-                    <Button ghost>c</Button>
-                    <Button ghost>0</Button>
-                    <Button ghost>.</Button>
-                    <Button ghost>d</Button>
+                    <Cbutton name="1"  clickHandler={this.clickHandler} >1</Cbutton>
+                    <Cbutton name="2"  clickHandler={this.clickHandler}>2</Cbutton>
+                    <Cbutton name="3"  clickHandler={this.clickHandler}>3</Cbutton>
+                    <Cbutton name="count"  datatype="string" clickHandler={this.clickHandler} className={calculateType === 'count' ? styles.activeButton : null}>数量</Cbutton>
+                    <Cbutton name="4"  clickHandler={this.clickHandler}>4</Cbutton>
+                    <Cbutton name="5"  clickHandler={this.clickHandler}>5</Cbutton>
+                    <Cbutton name="6"  clickHandler={this.clickHandler}>6</Cbutton>
+                    <Cbutton name="discount"  datatype="string" clickHandler={this.clickHandler} className={calculateType === 'discount' ? styles.activeButton : null}>折扣</Cbutton>
+                    <Cbutton name="7"  clickHandler={this.clickHandler}>7</Cbutton>
+                    <Cbutton name="8"  clickHandler={this.clickHandler}>8</Cbutton>
+                    <Cbutton name="9"  clickHandler={this.clickHandler}>9</Cbutton>
+                    <Cbutton name="unitPrice"  datatype="string" clickHandler={this.clickHandler} className={calculateType === 'unitPrice' ? styles.activeButton : null}>价格</Cbutton>
+                    <Cbutton name="clear"  clickHandler={this.clickHandler}>c</Cbutton>
+                    <Cbutton name="0"  clickHandler={this.clickHandler}>0</Cbutton>
+                    <Cbutton name="."  clickHandler={this.clickHandler}>.</Cbutton>
+                    <Cbutton name="del"  datatype="string" clickHandler={this.clickHandler}>del</Cbutton>
                 </div>
             </div>
         )
     }
 }
+export default connect(state => ({
+    commodity: state.commodity,
+    activeTabKey: state.commodity.activeKey,
+    orders: state.commodity.orders,
+}))(ChooseCalculator)

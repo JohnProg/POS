@@ -10,6 +10,26 @@ const dynamicWrapper = (app, models, component) => dynamic({
 // nav data
 export const getNavData = app => [
     {
+        component: dynamicWrapper(app, ['commodity', 'user', 'login'], () => import('../layouts/PosLayout')),
+        layout: 'PosLayout',
+        name: 'POS系统',
+        path: '/pos',
+        children: [
+            {
+                name: '商品',
+                icon: '',
+                path: 'pos',
+                children: [
+                    {
+                        name: '商品挑选',
+                        path: 'choose',
+                        component: dynamicWrapper(app, ['commodity'], () => import('../routes/Commodity/Choose')),
+                    },
+                ]
+            },
+        ],
+    },
+    {
         component: dynamicWrapper(app, ['user', 'login'], () => import('../layouts/BasicLayout')),
         layout: 'BasicLayout',
         name: '首页', // for breadcrumb

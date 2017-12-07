@@ -22,20 +22,23 @@ export default class Choose extends PureComponent {
         };
     }
 
+    componentDidMount() {
+        if (this.props.commodity.orders.length === 0) {
+            this.props.dispatch({type: 'commodity/clickAddButton'})
+        }
+
+    }
     onChange = (activeKey) => {
         this.props.dispatch({type: 'commodity/changeTab', payload: activeKey})
     }
     add = () => {
-        this.props.dispatch({type: 'commodity/addTab'})
+        this.props.dispatch({type: 'commodity/clickAddButton'})
     }
     remove = () => {
-        this.props.dispatch({type: 'commodity/minus'})
+        this.props.dispatch({type: 'commodity/removeTab'})
     }
     render() {
         const { orders, activeKey } = this.props.commodity || {}
-        if (orders.length === 0) {
-            this.props.dispatch({type: 'commodity/addTab'})
-        }
         const extraAddButton = (
             <div style={{ marginBottom: 16 }}>
                 <Button onClick={this.add}>+</Button>
