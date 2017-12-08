@@ -3,7 +3,7 @@ import { connect } from 'dva'
 import { Tabs, Button, Badge, Row, Col } from 'antd'
 import moment from 'moment'
 import styles from './Choose.less'
-import CommodityList from '../../components/CommodityList/'
+import GoodsList from '../../components/List/Goods/'
 
 const { TabPane  } = Tabs
 
@@ -12,16 +12,6 @@ const { TabPane  } = Tabs
 }))
 
 export default class Choose extends PureComponent {
-    constructor(props) {
-        super(props);
-        this.newTabIndex = 0;
-        const panes = []
-        this.state = {
-            activeKey: null,
-            panes,
-        };
-    }
-
     componentDidMount() {
         if (this.props.commodity.orders.length === 0) {
             this.props.dispatch({type: 'commodity/clickAddButton'})
@@ -34,15 +24,16 @@ export default class Choose extends PureComponent {
     add = () => {
         this.props.dispatch({type: 'commodity/clickAddButton'})
     }
-    remove = () => {
-        this.props.dispatch({type: 'commodity/removeTab'})
+    remove = (currentIndex) => {
+        this.props.dispatch({type: 'commodity/clickRemoveButton', payload: currentIndex})
     }
     render() {
         const { orders, activeKey } = this.props.commodity || {}
+        const currentIndex = orders.findIndex(item => item.key === activeKey)
         const extraAddButton = (
             <div style={{ marginBottom: 16 }}>
                 <Button onClick={this.add}>+</Button>
-                <Button onClick={this.remove}>-</Button>
+                <Button onClick={this.remove.bind(this, currentIndex)}>-</Button>
             </div>
         )
         return (
@@ -60,7 +51,7 @@ export default class Choose extends PureComponent {
                     {
                         orders.map(orderItem => (
                         <TabPane tab={orderItem.title} key={orderItem.key}>
-                            <CommodityList
+                            <GoodsList
                                 content={orderItem.content}
                                 dispatch={this.props.dispatch}
                             />

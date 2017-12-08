@@ -17,6 +17,26 @@ export default {
             const { list } = yield call(fetchCommodityList)
             yield put({type: 'saveCommodityList', payload: list})
         },
+        *clickRemoveButton(action, { put, select }) {
+            const currentIndex = action.payload
+            const commodity = yield select(state => state.commodity)
+            const orders = commodity.orders
+            const activeKey = commodity.activeKey
+            yield put({type: 'removeTab'})
+            // case1: panes 数量大于 1 且 activeOrders 不是最后一个
+            if (orders.length > 1 && currentIndex !== currentOrders.length - 1) {
+                const activeKey = currentOrders[currentIndex + 1].key
+                return { ...state, orders, activeKey }
+            }
+            // case2: panes 数量大于 1 且 activeOrders 是最后一个
+            if (currentOrders.length > 1 && currentIndex === currentOrders.length - 1) {
+                const activeKey = currentOrders[currentIndex - 1].key
+                return { ...state, orders, activeKey }
+            }
+            // case3: panes 数量等于1, 确保始终有一个 TabPane 
+
+            yield put({type: 'changeTabActiveKey'})
+        }
     },
 
     reducers: {
@@ -48,16 +68,40 @@ export default {
             const currentIndex = currentOrders.findIndex(item => item.key === activeTabKey)
             const orders = currentOrders.filter(item => item.key !== activeTabKey)
             // case1: panes 数量大于 1 且 activeOrders 不是最后一个
+            // if (currentOrders.length > 1 && currentIndex !== currentOrders.length - 1) {
+            //     const activeKey = currentOrders[currentIndex + 1].key
+            //     return { ...state, orders, activeKey }
+            // }
+            // case2: panes 数量大于 1 且 activeOrders 是最后一个
+            // if (currentOrders.length > 1 && currentIndex === currentOrders.length - 1) {
+            //     const activeKey = currentOrders[currentIndex - 1].key
+            //     return { ...state, orders, activeKey }
+            // }
+            // case3: panes 数量等于1, 确保始终有一个 TabPane 
+            if (orders.length > 1) {
+            return { ...state, orders }
+            }
+            return state
+        },
+        changeTabActiveKey(state, action) {
+            const activeTabKey = state.activeKey
+            console.log('activeTabKey', activeTabKey)
+            const currentOrders = state.orders
+            const currentIndex = currentOrders.findIndex(item => item.key === activeTabKey)
+            console.log('currentIndex', currentIndex)
+            // case1: panes 数量大于 1 且 activeOrders 不是最后一个
             if (currentOrders.length > 1 && currentIndex !== currentOrders.length - 1) {
                 const activeKey = currentOrders[currentIndex + 1].key
-                return { ...state, orders, activeKey }
+                return { ...state, activeKey }
             }
             // case2: panes 数量大于 1 且 activeOrders 是最后一个
             if (currentOrders.length > 1 && currentIndex === currentOrders.length - 1) {
                 const activeKey = currentOrders[currentIndex - 1].key
-                return { ...state, orders, activeKey }
+                return { ...state, activeKey }
             }
-            // case3: panes 数量等于1, 确保始终有一个 TabPane 
+            // case3: panes 数量等于1, 确保始终有一个 TabPane
+            return state
+
         },
         changeTab(state, action) {
             const activeKey = action.payload
@@ -129,7 +173,7 @@ export default {
             })
             return { ...state, orders: newOrders }
         },
-        changeSelectedItemCount(state, action) {
+        changeSelectedItem(state, action) {
             const { activeTabKey, newSelectedList } = action.payload
             const newOrders = state.orders.map(item => {
                 if (item.key && item.key === activeTabKey) {
