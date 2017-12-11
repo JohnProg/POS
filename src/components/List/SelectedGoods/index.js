@@ -10,7 +10,7 @@ class SelectedGoods extends PureComponent {
     handleClick = (key) => {
         this.props.dispatch({type: 'commodity/toggleSelectedGoods', payload: key})
     }
-    getTotalPrice = (selectedList) => {
+    getTotalPrice = (selectedList, activeSelectedKey) => {
         let totalPrice = 0
         selectedList.forEach(item => {
             const unitPrice = (item.NewUnitPrice || item.NewUnitPrice === 0) ? item.NewUnitPrice : item.UnitPrice 
@@ -19,6 +19,7 @@ class SelectedGoods extends PureComponent {
             const price = unitPrice * count * (discount || 100)/100
             totalPrice = totalPrice + price
         })
+        // this.props.dispatch({type: 'commodity/changeTotalPrice', payload: totalPrice, })
         return totalPrice
     }
     generateSelectedListNode = (selectedList, activeSelectedKey) => (
@@ -57,7 +58,7 @@ class SelectedGoods extends PureComponent {
                             <Divider type="vertical" className={styles.divider} />
                             <span>单价：</span>
                             <span className={(item.NewUnitPrice || item.NewUnitPrice === 0) ? styles.deletedText : null}>
-                                {unitPrice}
+                                {item.UnitPrice}
                             </span>
                             {
                                 (item.NewUnitPrice || item.NewUnitPrice === 0) ? (
@@ -172,7 +173,7 @@ class SelectedGoods extends PureComponent {
                         bodyStyle={{padding: '3px 15px 10px 15px'}}
                         className={styles.totalPriceCard}>
                         <span className={styles.totalPrice}>
-                                总价： {this.getTotalPrice(selectedList)}
+                                总价： {currentOrder.totalPrice}
                         </span>
                     </Card>
                 </div>

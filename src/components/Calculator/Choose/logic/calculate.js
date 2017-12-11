@@ -1,5 +1,10 @@
 import isNumber from '../../isNumber'
 
+function paymentHandler(activeTabKey, dispatch) {
+    const phase = 'payment'
+    dispatch({type: 'commodity/changePhase', payload: { activeTabKey, phase } })
+}
+
 function generateNewSelectedList(activeSelectedKey, selectedList, cache, number, type) {
     return selectedList.map(item => {
         if (item.Key === activeSelectedKey) {
@@ -27,7 +32,7 @@ function numberHandler(oldCache, buttonName, activeTabKey, selectedList, activeS
     }
     const number = cache - 0
     const newSelectedList = generateNewSelectedList(activeSelectedKey, selectedList, cache, number, type)
-    dispatch({type: 'commodity/changeSelectedItem', payload: { activeTabKey, newSelectedList }})
+    dispatch({type: 'commodity/changeSelectedList', payload: { activeTabKey, newSelectedList }})
 }
 
 function clearHandler(oldCache, activeTabKey, selectedList, activeSelectedKey, type, dispatch) {
@@ -36,7 +41,7 @@ function clearHandler(oldCache, activeTabKey, selectedList, activeSelectedKey, t
     let number = 0
     if (type === 'unitPrice') { number = null }
     const newSelectedList = generateNewSelectedList(activeSelectedKey, selectedList, cache, number, type )
-    dispatch({type: 'commodity/changeSelectedItem', payload: { activeTabKey, newSelectedList }})
+    dispatch({type: 'commodity/changeSelectedList', payload: { activeTabKey, newSelectedList }})
 }
 
 function dotHandler(oldCache, buttonName, activeTabKey, selectedList, activeSelectedKey, type, dispatch) {
@@ -51,7 +56,7 @@ function dotHandler(oldCache, buttonName, activeTabKey, selectedList, activeSele
         number = cache - 0
     }
     const newSelectedList = generateNewSelectedList(activeSelectedKey, selectedList, cache, number, type)
-    dispatch({type: 'commodity/changeSelectedItem', payload: { activeTabKey, newSelectedList }})
+    dispatch({type: 'commodity/changeSelectedList', payload: { activeTabKey, newSelectedList }})
 }
 
 function delHandler(oldCache, buttonName, activeTabKey, selectedList, activeSelectedKey, type, dispatch) {
@@ -65,7 +70,7 @@ function delHandler(oldCache, buttonName, activeTabKey, selectedList, activeSele
             number = cache - 0
         }
     const newSelectedList = generateNewSelectedList(activeSelectedKey, selectedList, cache, number, type)
-        dispatch({type: 'commodity/changeSelectedItem', payload: { activeTabKey, newSelectedList }})
+        dispatch({type: 'commodity/changeSelectedList', payload: { activeTabKey, newSelectedList }})
 }
 
 function countHandler(dispatch, buttonName, activeTabKey, selectedList, selectedItem, activeSelectedKey) {
@@ -106,7 +111,7 @@ function countHandler(dispatch, buttonName, activeTabKey, selectedList, selected
             }) 
 
         }
-        dispatch({type: 'commodity/changeSelectedItem', payload: { activeTabKey, newSelectedList, activeSelectedKey }})
+        dispatch({type: 'commodity/changeSelectedList', payload: { activeTabKey, newSelectedList, activeSelectedKey }})
         if (tempActiveKey !== undefined) {
             dispatch({type: 'commodity/changeActiveSelectedKey', payload: { activeTabKey, tempActiveKey }})
         }
@@ -141,7 +146,7 @@ function discountHandler(dispatch, buttonName, activeTabKey, selectedList, selec
             }
             return item
         })
-        dispatch({type: 'commodity/changeSelectedItem', payload: { activeTabKey, newSelectedList }})
+        dispatch({type: 'commodity/changeSelectedList', payload: { activeTabKey, newSelectedList }})
     }
     if (buttonName === 'clear') {
         clearHandler(oldCacheDiscount, activeTabKey, selectedList, activeSelectedKey, 'discount', dispatch)
@@ -173,14 +178,21 @@ export default function calculate(commodity, dispatch, buttonName) {
     const activeTabKey = commodity.activeKey
     const currentOrder = commodity.orders.filter(item => (item.key === activeTabKey))[0]
     const { selectedList } = currentOrder
+    if (!selectedList || (Array.isArray(selectedList) && selectedList.length === 0))  { return }
     const activeSelectedKey = currentOrder.activeKey
     const selectedItem = currentOrder.selectedList.filter(item => (item.Key === activeSelectedKey))[0]
     const calculateType = selectedItem.CalculateType
-    if (!selectedList || (Array.isArray(selectedList) && selectedList.length === 0))  { return }
     if(buttonName === 'count' || buttonName === 'discount' || buttonName === 'unitPrice') {
         if (selectedItem.CalculateType === buttonName) { return }
         dispatch({ type: 'commodity/changeCalculateType', payload: buttonName })
         return 
+    }
+    if (buttonName === 'customer') { 
+        console.log('customer')
+        return
+    }
+    if (buttonName === 'payment') {
+        paymentHandler(activeTabKey, dispatch)
     }
     if (calculateType === 'count') {
         countHandler(dispatch, buttonName, activeTabKey, selectedList, selectedItem, activeSelectedKey)
@@ -192,4 +204,5 @@ export default function calculate(commodity, dispatch, buttonName) {
         unitPriceHandler(dispatch, buttonName, activeTabKey, selectedList, selectedItem, activeSelectedKey)
     }
 }
+
 

@@ -18,8 +18,8 @@ class ChooseCalculator extends PureComponent {
         return (
             <div className={styles.calcWrapper}>
                 <div className={styles.actionPad}>
-                    <Cbutton name="customer">客户</Cbutton>
-                    <Cbutton name="payment">付款</Cbutton>
+                    <Cbutton name="customer" clickHandler={this.clickHandler}>客户</Cbutton>
+                    <Cbutton name="payment" clickHandler={this.clickHandler}>付款</Cbutton>
                 </div>
                 <div className={styles.numPad}>
                     <Cbutton name="1"  clickHandler={this.clickHandler} >1</Cbutton>

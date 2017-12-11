@@ -36,6 +36,16 @@ export default class Choose extends PureComponent {
                 <Button onClick={this.remove.bind(this, currentIndex)}>-</Button>
             </div>
         )
+        const PosPhase = (item) => {
+            switch (item.phase) {
+                case 'choose':
+                    return <GoodsList content={item.content} dispatch={this.props.dispatch} />
+                case 'payment':
+                    return 111
+                default:
+                    return
+            }
+        }
         return (
             <div
                 className={styles.tabsWrapper}
@@ -51,10 +61,9 @@ export default class Choose extends PureComponent {
                     {
                         orders.map(orderItem => (
                         <TabPane tab={orderItem.title} key={orderItem.key}>
-                            <GoodsList
-                                content={orderItem.content}
-                                dispatch={this.props.dispatch}
-                            />
+                            {
+                                PosPhase(orderItem)
+                            }
                         </TabPane>
                     ))
                     }
