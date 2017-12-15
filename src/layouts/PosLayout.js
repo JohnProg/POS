@@ -115,8 +115,6 @@ class PosLayout extends React.PureComponent {
     }
     render() {
         const { currentUser, collapsed, fetchingNotices, getRouteData, activeKey, orders } = this.props;
-
-
         const menu = (
             <Menu className={styles.menu} selectedKeys={[]} onClick={this.onMenuClick}>
                 <Menu.Item disabled><Icon type="user" />个人中心</Menu.Item>
@@ -130,73 +128,46 @@ class PosLayout extends React.PureComponent {
 
         const layout = (
             <Layout>
-                <Sider
-                    width={440}
-                    className={styles.sider}
-                >
-                    <Header className={styles.leftHeader}
-                    >
-                        <div className={styles.logo}>
-                            <Link to="/">
-                                <h1>POS</h1>
-                            </Link>
-                        </div>
-                    </Header>
-                    <Content
-                        className={styles.leftContent}
-                    >
-                        <SelectedGoods />
-                    </Content>
-                    <div
-                        className={styles.calculator}
-                    >
-                        <ChooseCalculator />
-                    </div>
-                </Sider>
-                <Layout
-                    className={styles.rightContent}
-                >
-                    <Content style={{height: '100%' }}>
-                        <div style={{ minHeight: 'calc(100vh - 260px)' }}>
-                            <Switch>
-                                {
-                                    getRouteData('PosLayout').map(item =>
-                                        (
-                                            <Route
-                                                exact={item.exact}
-                                                key={item.path}
-                                                path={item.path}
-                                                component={item.component}
-                                            />
-                                        )
+                <Content style={{height: '100%' }}>
+                    <div style={{ minHeight: 'calc(100vh - 260px)' }}>
+                        <Switch>
+                            {
+                                getRouteData('PosLayout').map(item =>
+                                    (
+                                        <Route
+                                            exact={item.exact}
+                                            key={item.path}
+                                            path={item.path}
+                                            component={item.component}
+                                        />
                                     )
-                                }
-                                <Redirect exact from="/pos" to="/pos/choose" />
-                                <Route component={NotFound} />
-                            </Switch>
-                        </div>
-                        <GlobalFooter
-                            links={[{
-                                title: 'Pro 首页',
-                                href: 'http://pro.ant.design',
-                                blankTarget: true,
-                            }, {
-                                title: 'GitHub',
-                                href: 'https://github.com/ant-design/ant-design-pro',
-                                blankTarget: true,
-                            }, {
-                                title: 'Ant Design',
-                                href: 'http://ant.design',
-                                blankTarget: true,
-                            }]}
-                            copyright={
-                                <div>
-                                    Copyright <Icon type="copyright" /> 2017 蚂蚁金服体验技术部出品
-                                </div>
+                                )
                             }
-                        />
-                    </Content>
-                </Layout>
+                            <Redirect exact from="/pos" to="/pos/choose" />
+                            <Route component={NotFound} />
+                        </Switch>
+                    </div>
+                    <GlobalFooter
+                        links={[{
+                            title: 'Pro 首页',
+                            href: 'http://pro.ant.design',
+                            blankTarget: true,
+                        }, {
+                            title: 'GitHub',
+                            href: 'https://github.com/ant-design/ant-design-pro',
+                            blankTarget: true,
+                        }, {
+                            title: 'Ant Design',
+                            href: 'http://ant.design',
+                            blankTarget: true,
+                        }]}
+                        copyright={
+                            <div>
+                                Copyright <Icon type="copyright" /> Orssica
+                            </div>
+                        }
+                    />
+                </Content>
             </Layout>
         );
 

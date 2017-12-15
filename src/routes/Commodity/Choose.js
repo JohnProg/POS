@@ -1,11 +1,16 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva'
-import { Tabs, Button, Badge, Row, Col } from 'antd'
+import { routerRedux, Link } from 'dva/router';
+import { Tabs, Button, Badge, Row, Col, Icon, } from 'antd'
 import moment from 'moment'
 import styles from './Choose.less'
 import GoodsList from '../../components/List/Goods/'
+import ChooseCalculator from '../../components/Calculator/Choose/'
+import SelectedGoods from '../../components/List/SelectedGoods/'
+import Payment from './Payment'
 
-const { TabPane  } = Tabs
+const { TabPane } = Tabs
+
 
 @connect(state => ({
     commodity: state.commodity,
@@ -19,6 +24,13 @@ export default class Choose extends PureComponent {
 
     }
     onChange = (activeKey) => {
+        if (activeKey === '+') {
+        this.props.dispatch({type: 'commodity/clickAddButton'})
+            return
+        }
+        if (activeKey === '-') {
+            return
+        }
         this.props.dispatch({type: 'commodity/changeTab', payload: activeKey})
     }
     add = () => {
@@ -30,18 +42,46 @@ export default class Choose extends PureComponent {
     render() {
         const { orders, activeKey } = this.props.commodity || {}
         const currentIndex = orders.findIndex(item => item.key === activeKey)
-        const extraAddButton = (
-            <div style={{ marginBottom: 16 }}>
-                <Button onClick={this.add}>+</Button>
-                <Button onClick={this.remove.bind(this, currentIndex)}>-</Button>
-            </div>
+        const createTabTitle = (title) => {
+            if (title === '+') {
+                return (
+                    <div className={styles.operationButton}>
+                        <Icon type='plus'/>
+                    </div>
+                )
+            }
+            if (title === '-') {
+                return (
+                    <div className={styles.operationButton}>
+                        <Icon type="minus" onClick={this.remove.bind(this, currentIndex)} />
+                    </div>
+                )
+            }
+            if (typeof title === 'number') {
+                const timeStamp = moment().format('x')
+                const localTime = moment().format('HH:mm')
+                const tabsBarElement = (
+                    <div className={styles.tabsBarContent}>
+                        <Badge count={title} overflowCount={1000} />
+                        <span>{localTime}</span>
+                    </div>
+                )
+                return tabsBarElement
+            }
+        }
+        const leftHeader = (
+                        <div className={styles.logo}>
+                            <Link to="/">
+                                <h1>POS</h1>
+                            </Link>
+                        </div>
         )
         const PosPhase = (item) => {
             switch (item.phase) {
                 case 'choose':
                     return <GoodsList content={item.content} dispatch={this.props.dispatch} />
                 case 'payment':
-                    return 111
+                    return <Payment />
                 default:
                     return
             }
@@ -52,7 +92,7 @@ export default class Choose extends PureComponent {
             >
                 <Tabs
                     hideAdd
-                    tabBarExtraContent={extraAddButton}
+                    tabBarExtraContent={leftHeader}
                     onChange={this.onChange}
                     activeKey={activeKey}
                     type="card"
@@ -60,10 +100,12 @@ export default class Choose extends PureComponent {
                 >
                     {
                         orders.map(orderItem => (
-                        <TabPane tab={orderItem.title} key={orderItem.key}>
+                        <TabPane tab={createTabTitle(orderItem.title)} key={orderItem.key}>
+                                <div className={styles.tabContent}>
                             {
                                 PosPhase(orderItem)
                             }
+                                </div>
                         </TabPane>
                     ))
                     }

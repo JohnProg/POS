@@ -1,6 +1,7 @@
 .commodityListWrapper {
     padding: 10px;
-    margin: 0 auto;
+    /* margin: 0 auto; */
+    margin-left: 440px;
     .commodityItem {
         margin: 8px;
         display: inline-block;
@@ -66,4 +67,18 @@
     opacity: 0;
     transform: scale(150, 150);
   }
+}
+.sider {
+    background-color: #F0F2F5;
+    height: 100vh;
+    border-right: 3px solid #393939;
+    /* box-shadow: 2px 0 6px rgba(0, 21, 41, .35); */
+    position: fixed;
+    top: 0;
+    padding-top: 48px;
+    z-index: 10;
+    :global(.ant-layout-sider-children) {
+        display: flex;
+        flex-direction: column;
+    }
 }

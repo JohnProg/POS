@@ -2,20 +2,92 @@ import { Badge } from 'antd'
 import moment from 'moment'
 import { fetchCommodityList } from '../services/api'
 
-function getSelectedListFromCommodity() {
-
+function getCurrentOrder(state) {
+    return state.orders.filter(item => item.key === state.activeKey)[0]
 }
+
 
 export default {
     namespace: 'commodity',
 
     state: {
         orders: [],
+        operationButton: ['add', 'minus'],
         activeKey: null,
         newTabIndex: 0,
     },
 
     effects: {
+        *clickCashButton(action, { put, select }) {
+            const commodity = yield select(state => state.commodity)
+            const currentOrder = getCurrentOrder(commodity)
+            const { paymentData, paymentDataIndex } = currentOrder
+            const activePaymentDataIndex = paymentData.length
+            yield put({type: 'changePaymentDataIndex', payload: paymentDataIndex})
+            const newPaymentData = [ ...paymentData, {
+                demand: 0,
+                cash: 0,
+                giveChange: 0,
+                method: '现金',
+                key: paymentDataIndex
+            } ]
+            yield put({type: 'changePaymentData', payload: newPaymentData})
+            yield put({type: 'changeActivePaymentDataIndex', payload: activePaymentDataIndex})
+            yield put({type: 'checkPaymentData'})
+        },
+        *clickRemovePaymentDataItemButton(action, { put, select }) {
+            const removeIndex = action.payload
+            const commodity = yield select(state => state.commodity)
+            const currentOrder = getCurrentOrder(commodity)
+            const { paymentData, paymentDataIndex } = currentOrder
+            const newPaymentData = paymentData.filter((item, index) => {
+                return index !== removeIndex
+            })
+            yield put({type: 'changePaymentData', payload: newPaymentData})
+            yield put({type: 'checkPaymentData'})
+        },
+        *checkPaymentData(action, { put, select }) {
+            const commodity = yield select(state => state.commodity)
+            const currentOrder = getCurrentOrder(commodity)
+            const { paymentData, paymentDataIndex, activePaymentDataIndex, totalPrice } = currentOrder
+            if (paymentData.length === 0) {
+                yield put({type: 'changeActivePaymentDataIndex', payload: null})
+                return
+            } 
+            let currentItem
+            if (!paymentData[activePaymentDataIndex]) {
+                currentItem = paymentData[activePaymentDataIndex - 1]
+                yield put({type: 'changeActivePaymentDataIndex', payload: activePaymentDataIndex - 1})
+            } else {
+                currentItem = paymentData[activePaymentDataIndex]
+            }
+            const { cash } = currentItem
+            function generateDemand(prevDemand, prevCash) {
+                if (prevDemand > prevCash) {
+                    return prevDemand - prevCash
+                } else {
+                    return 0
+                }
+            }
+            function generateGiveChange(demand, cash) {
+                if (cash > demand) {
+                    return cash - demand
+                } else {
+                    return 0
+                }
+            }
+            let prevItem 
+            const newPaymentData = paymentData.map((item, index, array) => {
+                if (index === 0) {
+                    prevItem = { ...item, demand: totalPrice, giveChange: generateGiveChange(item.demand,  item.cash) }
+                    return prevItem
+                } else {
+                    prevItem = { ...item, demand: generateDemand(prevItem.demand, prevItem.cash), giveChange: generateGiveChange(item.demand, item.cash) }
+                    return prevItem
+                }
+            })
+            yield put({type: 'changePaymentData', payload: newPaymentData})
+        },
         *addToSelectedList(action, { put, select }) {
             const selectedKey = action.payload
             const { orders, activeKey } = yield select(state => state.commodity)
@@ -82,6 +154,7 @@ export default {
             const commodity = yield select(state => state.commodity)
             let count = ++commodity.newTabIndex
             yield put({type: 'addTab', payload: count})
+            yield put({type: 'initOperationButton'})
             const { activeKey }= yield select(state => state.commodity)
             const { list } = yield call(fetchCommodityList)
             yield put({type: 'saveCommodityList', payload: {list, activeKey}})
@@ -93,15 +166,15 @@ export default {
             let activeKey
             yield put({type: 'removeTab'})
             // case1: panes 数量大于 1 且 activeOrders 不是最后一个
-            if (orders.length > 1 && currentIndex !== orders.length - 1) {
+            if (orders.length > 3 && currentIndex !== orders.length - 3) {
                 activeKey = orders[currentIndex + 1].key
             }
             // case2: panes 数量大于 1 且 activeOrders 是最后一个
-            if (orders.length > 1 && currentIndex === orders.length - 1) {
+            if (orders.length > 3 && currentIndex === orders.length - 3) {
                 activeKey = orders[currentIndex - 1].key
             }
             // case3: panes 数量等于1, 确保始终有一个 TabPane 
-            if (orders.length === 1) {
+            if (orders.length === 3) {
                 activeKey = orders[currentIndex].key
             }
             yield put({type: 'changeTab', payload: activeKey})
@@ -109,23 +182,28 @@ export default {
     },
 
     reducers: {
+        initOperationButton(state, action) {
+            const operationButton = state.operationButton.map(item => {
+                if (item === 'add') { return { title: '+', key: '+' } }
+                if (item === 'minus') { return { title: '-', key: '-' } }
+                return item
+            })
+            const orders = [ ...state.orders, ...operationButton ]
+            return { ...state, orders }
+        },
         addTab(state, action) {
             const count = action.payload
             const currentActiveKey = state.activeKey
-            const timeStamp = moment().format('x')
-            const localTime = moment().format('HH:mm')
-            const tabsBarElement = (
-                <div className="tabsContent">
-                    <Badge count={count} overflowCount={1000} />
-                    <span>{localTime}</span>
-                </div>
-            )
-            const orders = [...state.orders,
+            const goodsOrders = state.orders.filter(item => typeof item.title !== 'string' )
+            const orders = [...goodsOrders,
                 {
-                    title: tabsBarElement,
+                    title: count,
                     key: `orders-${count}`,
                     selectedList: [],
                     activeKey: null,
+                    paymentDataIndex: 0,
+                    paymentData: [],
+                    activePaymentDataIndex: null,
                 },
             ]
             const activeKey = `orders-${count}`;
@@ -134,7 +212,7 @@ export default {
         removeTab(state, action) {
             const activeTabKey = state.activeKey
             const orders = state.orders.filter(item => item.key !== activeTabKey)
-            if (orders.length > 0) {
+            if (orders.length > 2) {
                 return { ...state, orders }
             }
             return state
@@ -230,6 +308,41 @@ export default {
             const newOrders = state.orders.map(item => {
                 if (item.key && item.key === activeTabKey) {
                     return { ...item, phase }
+                }
+                return item
+            })
+            return { ...state, orders: newOrders }
+        },
+        changePaymentData(state, action) {
+            const paymentData = action.payload
+            const { activeKey } = state
+            const newOrders = state.orders.map(item => {
+                if (item.key === activeKey) {
+                    return { ...item, paymentData }
+                }
+                return item
+            })
+            return { ...state, orders: newOrders }
+        },
+        changePaymentDataIndex(state, action) {
+            let paymentDataIndex = action.payload
+            const { activeKey } = state
+            const currentOrder = getCurrentOrder(state)
+            paymentDataIndex += 1
+            const newOrders = state.orders.map(item => {
+                if (item.key === activeKey) {
+                    return { ...item, paymentDataIndex }
+                }
+                return item
+            })
+            return { ...state, orders: newOrders }
+        },
+        changeActivePaymentDataIndex(state, action) {
+            const activePaymentDataIndex = action.payload
+            const { activeKey } = state
+            const newOrders = state.orders.map(item => {
+                if (item.key === activeKey) {
+                    return { ...item, activePaymentDataIndex }
                 }
                 return item
             })

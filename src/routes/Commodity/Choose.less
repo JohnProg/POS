@@ -2,6 +2,10 @@
     background-color: #F0EEEE;
     :global(.ant-tabs-bar) {
         background-color: #393939;
+        margin-bottom: 0px !important;
+        position: fixed;
+        width: 100%;
+        z-index: 1000;
     }
     :global(.ant-tabs-nav) {
         height: 48px;
@@ -11,20 +15,64 @@
     }
     :global(.ant-tabs-tab) {
         line-height: 48px !important;
+        padding: 0px !important;
     }
     :global(.ant-badge) {
         bottom: 2px;
     }
+    :global(.ant-tabs-extra-content) {
+        float: left !important;
+        width: 440px;
+    }
 }
-
-.tabsContent {
+.tabsBarContent {
+    padding-left: 10px;
+    padding-right: 10px;
     vertical-align: middle;
     line-height: 48px;
+}
+.tabContent {
+    margin-top: 48px;
+}
+
+.operationButton {
+    vertical-align: middle;
+    line-height: 48px;
+    font-weight: 800;
+    i {
+        margin-left: 0px !important;
+        margin-right: 0px !important;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
 }
 .localTime {
     display: inline-block;
     height: 20px;
     line-height: 20px;
     margin-left: 5px;
+}
+.logo {
+    height: 48px;
+    position: relative;
+    line-height: 48px;
+    padding-left: 4px;
+    transition: all .3s;
+    /* background: #002140; */
+    overflow: hidden;
+    img {
+        display: inline-block;
+        vertical-align: middle;
+        height: 32px;
+    }
+    h1 {
+        color: #fff;
+        display: inline-block;
+        vertical-align: middle;
+        font-size: 20px;
+        margin: 0 0 0 12px;
+        font-family: 'Myriad Pro', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        font-weight: 600;
+    }
 }
 

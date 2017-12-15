@@ -25,6 +25,11 @@ export const getNavData = app => [
                         path: 'choose',
                         component: dynamicWrapper(app, ['commodity'], () => import('../routes/Commodity/Choose')),
                     },
+                    {
+                        name: '商品付款',
+                        path: 'payment',
+                        component: dynamicWrapper(app, ['commodity'], () => import('../routes/Commodity/Payment')),
+                    }
                 ]
             },
         ],

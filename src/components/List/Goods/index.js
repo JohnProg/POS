@@ -1,7 +1,13 @@
 import React, { PureComponent } from 'react';
-import { Card, Button } from 'antd'
+import { Card, Button, Layout } from 'antd'
 import { connect } from 'dva'
+import { Link } from 'dva/router';
 import styles from './index.less'
+import ChooseCalculator from '../../Calculator/Choose/'
+import SelectedGoods from '../../List/SelectedGoods/'
+
+
+const { Header, Sider, Content } = Layout;
 
 export default class CommodityList extends PureComponent {
     constructor(props) {
@@ -61,11 +67,31 @@ export default class CommodityList extends PureComponent {
             </Card>
         )
         return (
-            <div className={styles.commodityListWrapper}>
-                {
-                    Array.isArray(content) && content.map(item => commodityItem(item))
-                }
-            </div>
+            <Layout>
+                <Sider
+                    width={440}
+                    className={styles.sider}
+                >
+                    <Content
+                        className={styles.leftContent}
+                    >
+                        <SelectedGoods />
+                    </Content>
+                    <div
+                        className={styles.calculator}
+                    >
+                        <ChooseCalculator />
+                    </div>
+                </Sider>
+                <Content>
+                    <div className={styles.commodityListWrapper}>
+
+                        {
+                            Array.isArray(content) && content.map(item => commodityItem(item))
+                        }
+                    </div>
+                </Content>
+            </Layout>
         )
     }
 }
