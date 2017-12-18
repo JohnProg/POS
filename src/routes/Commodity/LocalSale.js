@@ -5,11 +5,8 @@ import styles from './LocalSale.less'
 import PaymentCalculator from '../../components/Calculator/Payment/'
 
 class LocalSale extends PureComponent {
-    constructor(props) {
-        super(props)
-    }
-    handleRemoveClick = (removeIndex) => {
-        this.props.dispatch({type: 'commodity/clickRemovePaymentDataItemButton', payload: removeIndex})
+    handleRemoveClick = (index) => {
+        this.props.dispatch({type: 'commodity/clickRemovePaymentDataItemButton', payload: index})
     }
     handleCashClick = () => {
         this.props.dispatch({type: 'commodity/clickCashButton'})
@@ -24,37 +21,26 @@ class LocalSale extends PureComponent {
             },
         }
     }
-    handlePlus50Click = () => {
-        const newData = this.state.data.map((item, index) => {
-            if (this.state.clickedRowIndex === index) {
-                return { ...item, cash: item.cash + 50 }
-            } return item
-        })
-        this.setState({
-            data: newData,
-        }, this.checkData)
-    }
-    handleMinus50Click = () => {
-        const newData = this.state.data.map((item, index) => {
-            if (this.state.clickedRowIndex === index) {
-                return { ...item, cash: item.cash - 50 }
-            } return item
-        })
-        this.setState({
-            data: newData,
-        }, this.checkData)
-    }
-    validate(totalPrice, data) {
-        let cash = 0
-        data.forEach(item => {
-            cash += item.cash
-        })
-        if (cash >= totalPrice) {
-            this.props.validate(true)
-        } else {
-            this.props.validate(false)
-        }
-    }
+    // handlePlus50Click = () => {
+    //     const newData = this.state.data.map((item, index) => {
+    //         if (this.state.clickedRowIndex === index) {
+    //             return { ...item, cash: item.cash + 50 }
+    //         } return item
+    //     })
+    //     this.setState({
+    //         data: newData,
+    //     }, this.checkData)
+    // }
+    // handleMinus50Click = () => {
+    //     const newData = this.state.data.map((item, index) => {
+    //         if (this.state.clickedRowIndex === index) {
+    //             return { ...item, cash: item.cash - 50 }
+    //         } return item
+    //     })
+    //     this.setState({
+    //         data: newData,
+    //     }, this.checkData)
+    // }
     render() {
         const { totalPrice, paymentData } = this.props.order
         const columns = [{

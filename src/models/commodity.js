@@ -29,7 +29,8 @@ export default {
                 cash: 0,
                 giveChange: 0,
                 method: '现金',
-                key: paymentDataIndex
+                key: paymentDataIndex,
+                cacheCash: null,
             } ]
             yield put({type: 'changePaymentData', payload: newPaymentData})
             yield put({type: 'changeActivePaymentDataIndex', payload: activePaymentDataIndex})
@@ -39,28 +40,18 @@ export default {
             const removeIndex = action.payload
             const commodity = yield select(state => state.commodity)
             const currentOrder = getCurrentOrder(commodity)
-            const { paymentData, paymentDataIndex } = currentOrder
+            const { paymentData, activePaymentDataIndex } = currentOrder
             const newPaymentData = paymentData.filter((item, index) => {
                 return index !== removeIndex
             })
             yield put({type: 'changePaymentData', payload: newPaymentData})
-            yield put({type: 'checkPaymentData'})
+            yield put({type: 'changeActivePaymentDataIndex', payload: activePaymentDataIndex})
         },
         *checkPaymentData(action, { put, select }) {
             const commodity = yield select(state => state.commodity)
             const currentOrder = getCurrentOrder(commodity)
             const { paymentData, paymentDataIndex, activePaymentDataIndex, totalPrice } = currentOrder
-            if (paymentData.length === 0) {
-                yield put({type: 'changeActivePaymentDataIndex', payload: null})
-                return
-            } 
-            let currentItem
-            if (!paymentData[activePaymentDataIndex]) {
-                currentItem = paymentData[activePaymentDataIndex - 1]
-                yield put({type: 'changeActivePaymentDataIndex', payload: activePaymentDataIndex - 1})
-            } else {
-                currentItem = paymentData[activePaymentDataIndex]
-            }
+            const currentItem = paymentData.filter((item, index) => index === activePaymentDataIndex)[0]
             const { cash } = currentItem
             function generateDemand(prevDemand, prevCash) {
                 if (prevDemand > prevCash) {
@@ -338,8 +329,15 @@ export default {
             return { ...state, orders: newOrders }
         },
         changeActivePaymentDataIndex(state, action) {
-            const activePaymentDataIndex = action.payload
+            let activePaymentDataIndex = action.payload
             const { activeKey } = state
+            const currentOrder = getCurrentOrder(state)
+            const { paymentData } = currentOrder
+            if (paymentData.length === 0) {
+                activePaymentDataIndex = null
+            } else if (!paymentData[activePaymentDataIndex]) {
+                activePaymentDataIndex = 0
+            }
             const newOrders = state.orders.map(item => {
                 if (item.key === activeKey) {
                     return { ...item, activePaymentDataIndex }

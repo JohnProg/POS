@@ -7,7 +7,7 @@ import calculate from './logic/calculate'
 
 class PaymentCalculator extends PureComponent {
     clickHandler = (buttonName) => {
-        // calculate(this.props.commodity, this.props.dispatch, buttonName)
+        calculate(this.props.commodity, this.props.dispatch, buttonName)
     }
     render() {
         const { orders, activeTabKey } = this.props
