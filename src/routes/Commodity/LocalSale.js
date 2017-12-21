@@ -5,6 +5,10 @@ import styles from './LocalSale.less'
 import PaymentCalculator from '../../components/Calculator/Payment/'
 
 class LocalSale extends PureComponent {
+    componentDidMount() {
+        const paymentData = this.props.order.paymentData
+        Array.isArray(paymentData) && paymentData.length > 0 && this.props.dispatch({type: 'commodity/checkPaymentData'})
+    }
     handleRemoveClick = (index) => {
         this.props.dispatch({type: 'commodity/clickRemovePaymentDataItemButton', payload: index})
     }
@@ -21,26 +25,6 @@ class LocalSale extends PureComponent {
             },
         }
     }
-    // handlePlus50Click = () => {
-    //     const newData = this.state.data.map((item, index) => {
-    //         if (this.state.clickedRowIndex === index) {
-    //             return { ...item, cash: item.cash + 50 }
-    //         } return item
-    //     })
-    //     this.setState({
-    //         data: newData,
-    //     }, this.checkData)
-    // }
-    // handleMinus50Click = () => {
-    //     const newData = this.state.data.map((item, index) => {
-    //         if (this.state.clickedRowIndex === index) {
-    //             return { ...item, cash: item.cash - 50 }
-    //         } return item
-    //     })
-    //     this.setState({
-    //         data: newData,
-    //     }, this.checkData)
-    // }
     render() {
         const { totalPrice, paymentData } = this.props.order
         const columns = [{

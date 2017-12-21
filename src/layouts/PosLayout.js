@@ -143,7 +143,6 @@ class PosLayout extends React.PureComponent {
                                     )
                                 )
                             }
-                            <Redirect exact from="/pos" to="/pos/choose" />
                             <Route component={NotFound} />
                         </Switch>
                     </div>

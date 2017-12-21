@@ -195,6 +195,7 @@ export default {
                     paymentDataIndex: 0,
                     paymentData: [],
                     activePaymentDataIndex: null,
+                    type: 'normal',
                 },
             ]
             const activeKey = `orders-${count}`;

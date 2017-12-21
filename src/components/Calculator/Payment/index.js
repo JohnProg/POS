@@ -26,7 +26,7 @@ class PaymentCalculator extends PureComponent {
                     <Cbutton name="7"  clickHandler={this.clickHandler}>7</Cbutton>
                     <Cbutton name="8"  clickHandler={this.clickHandler}>8</Cbutton>
                     <Cbutton name="9"  clickHandler={this.clickHandler}>9</Cbutton>
-                    <Cbutton name="+20"  datatype="string" clickHandler={this.clickHandler} >+50</Cbutton>
+                    <Cbutton name="+50"  datatype="string" clickHandler={this.clickHandler} >+50</Cbutton>
                     <Cbutton name="clear"  clickHandler={this.clickHandler}>c</Cbutton>
                     <Cbutton name="0"  clickHandler={this.clickHandler}>0</Cbutton>
                     <Cbutton name="."  clickHandler={this.clickHandler}>.</Cbutton>

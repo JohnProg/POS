@@ -262,31 +262,91 @@ class BasicLayout extends React.PureComponent {
     const layout = (
       <Layout>
         <Sider
-          width={440}
-          className={styles.sider}
+            trigger={null}
+            collapsible
+            collapsed={collapsed}
+            onCollapse={this.onCollapse}
+            className={styles.sider}
+            width={256}
         >
-            <Header className={styles.leftHeader}
-            >
-                <div className={styles.logo}>
-                    <Link to="/">
-                        <h1>POS</h1>
-                    </Link>
-                </div>
-            </Header>
-            <Content
-                className={styles.leftContent}
-            >
-                content
-            </Content>
-            <div
-                className={styles.calculator}
-            >
-                <ChooseCalculator />
-            </div>
+          <div className={styles.logo}>
+            <Link to="/">
+              <img src="https://gw.alipayobjects.com/zos/rmsportal/iwWyPinUoseUxIAeElSx.svg" alt="logo" />
+              <h1>Orssica Pos</h1>
+            </Link>
+          </div>
+          <Menu
+            theme="dark"
+            mode="inline"
+            {...menuProps}
+            onOpenChange={this.handleOpenChange}
+            selectedKeys={this.getCurrentMenuSelectedKeys()}
+            style={{ margin: '16px 0', width: '100%' }}
+          >
+            {this.getNavMenuItems(this.menus)}
+          </Menu>
         </Sider>
         <Layout
             className={styles.rightContent}
         >
+          <Header className={styles.header}>
+            <Icon
+              className={styles.trigger}
+              type={collapsed ? 'menu-unfold' : 'menu-fold'}
+              onClick={this.toggle}
+            />
+            <div className={styles.right}>
+              <HeaderSearch
+                className={`${styles.action} ${styles.search}`}
+                placeholder="站内搜索"
+                dataSource={['搜索提示一', '搜索提示二', '搜索提示三']}
+                onSearch={(value) => {
+                  console.log('input', value); // eslint-disable-line
+                }}
+                onPressEnter={(value) => {
+                  console.log('enter', value); // eslint-disable-line
+                }}
+              />
+              <NoticeIcon
+                className={styles.action}
+                count={currentUser.notifyCount}
+                onItemClick={(item, tabProps) => {
+                  console.log(item, tabProps); // eslint-disable-line
+                }}
+                onClear={this.handleNoticeClear}
+                onPopupVisibleChange={this.handleNoticeVisibleChange}
+                loading={fetchingNotices}
+                popupAlign={{ offset: [20, -16] }}
+              >
+                <NoticeIcon.Tab
+                  list={noticeData['通知']}
+                  title="通知"
+                  emptyText="你已查看所有通知"
+                  emptyImage="https://gw.alipayobjects.com/zos/rmsportal/wAhyIChODzsoKIOBHcBk.svg"
+                />
+                <NoticeIcon.Tab
+                  list={noticeData['消息']}
+                  title="消息"
+                  emptyText="您已读完所有消息"
+                  emptyImage="https://gw.alipayobjects.com/zos/rmsportal/sAuJeJzSKbUmHfBQRzmZ.svg"
+                />
+                <NoticeIcon.Tab
+                  list={noticeData['待办']}
+                  title="待办"
+                  emptyText="你已完成所有待办"
+                  emptyImage="https://gw.alipayobjects.com/zos/rmsportal/HsIsxMZiWKrNUavQUXqx.svg"
+                />
+              </NoticeIcon>
+              {currentUser.name ? (
+                <Dropdown overlay={menu}>
+                  <span className={`${styles.action} ${styles.account}`}>
+                    <Avatar size="small" className={styles.avatar} src={currentUser.avatar} />
+                    {currentUser.name}
+                  </span>
+                </Dropdown>
+              ) : <Spin size="small" style={{ marginLeft: 8 }} />}
+            </div>
+          </Header>
           <Content style={{height: '100%' }}>
             <div style={{ minHeight: 'calc(100vh - 260px)' }}>
               <Switch>
@@ -302,7 +362,6 @@ class BasicLayout extends React.PureComponent {
                     )
                   )
                 }
-                <Redirect exact from="/" to="/commodity/choose" />
                 <Route component={NotFound} />
               </Switch>
             </div>

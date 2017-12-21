@@ -16,21 +16,10 @@ export const getNavData = app => [
         path: '/pos',
         children: [
             {
-                name: '商品',
-                icon: '',
+                name: 'Point of Sale',
+                icon: 'shopping-cart',
                 path: 'pos',
-                children: [
-                    {
-                        name: '商品挑选',
-                        path: 'choose',
-                        component: dynamicWrapper(app, ['commodity'], () => import('../routes/Commodity/Choose')),
-                    },
-                    {
-                        name: '商品付款',
-                        path: 'payment',
-                        component: dynamicWrapper(app, ['commodity'], () => import('../routes/Commodity/Payment')),
-                    }
-                ]
+                component: dynamicWrapper(app, ['commodity'], () => import('../routes/Commodity/Choose')),
             },
         ],
     },
@@ -41,16 +30,40 @@ export const getNavData = app => [
         path: '/',
         children: [
             {
-                name: '商品',
-                icon: '',
-                path: 'commodity',
+                name: '销售分析',
+                icon: 'area-chart',
+                path: 'analysis',
+                component: dynamicWrapper(app, ['user', 'login'], () => import('../routes/Drag/')),
+            },
+            {
+                name: '日结管理',
+                icon: 'line-chart',
+                path: 'dailyClosing',
                 children: [
                     {
-                        name: '商品挑选',
-                        path: 'choose',
-                        component: dynamicWrapper(app, ['commodity'], () => import('../routes/Commodity/Choose')),
+                        name: '数据统计',
+                        path: 'statistics',
+                    },
+                    {
+                        name: '现金收款统计',
+                        path: 'cashStatistics',
                     },
                 ]
+            },
+            {
+                name: '订货管理',
+                icon: 'shop',
+                path: 'orderGoods',
+            },
+            {
+                name: '历史订单',
+                icon: 'exception',
+                path: 'historyOrder',
+            },
+            {
+                name: '调拨管理',
+                icon: 'notification',
+                path: 'allocateAndTransfer',
             },
             {
                 name: 'Dashboard',
