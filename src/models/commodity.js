@@ -18,6 +18,34 @@ export default {
     },
 
     effects: {
+        *clickGoodsItemTrue(action, { put, select }) {
+            const commodity = yield select(state => state.commodity)
+            const currentOrder = getCurrentOrder(commodity)
+            const { content } = currentOrder
+            const key = action.payload
+            let newContent = content.map(item => {
+                if (item.Key === key) {
+                    return { ...item, dataClicked: "true" }
+                }
+                return item
+            })
+            yield put({type: 'changeCommodityContent', payload: newContent})
+
+        },
+        *clickGoodsItem(action, { put, select }) {
+            const commodity = yield select(state => state.commodity)
+            const currentOrder = getCurrentOrder(commodity)
+            const { content } = currentOrder
+            const key = action.payload
+            let newContent = content.map(item => {
+                if (item.Key === key) {
+                    return { ...item, dataClicked: null }
+                }
+                return item
+            })
+            yield put({type: 'changeCommodityContent', payload: newContent})
+            yield put({type: 'addToSelectedList', payload: key})
+        },
         *clickCashButton(action, { put, select }) {
             const commodity = yield select(state => state.commodity)
             const currentOrder = getCurrentOrder(commodity)
@@ -146,9 +174,9 @@ export default {
             let count = ++commodity.newTabIndex
             yield put({type: 'addTab', payload: count})
             yield put({type: 'initOperationButton'})
-            const { activeKey }= yield select(state => state.commodity)
+            // const { activeKey }= yield select(state => state.commodity)
             const { list } = yield call(fetchCommodityList)
-            yield put({type: 'saveCommodityList', payload: {list, activeKey}})
+            yield put({type: 'saveCommodityList', payload: list})
         },
         *clickRemoveButton(action, { put, select }) {
             const currentIndex = action.payload
@@ -214,10 +242,22 @@ export default {
             return { ...state, activeKey }
         },
         saveCommodityList(state, action) {
-            const {list, activeKey} = action.payload || []
+            const activeTabKey = state.activeKey
+            const list = action.payload || []
             const newOrders = state.orders.map(item => {
-                if (item.key && item.key === activeKey) {
+                if (item.key && item.key === activeTabKey) {
                     return { ...item, content: list, avoidDuplicationIndex: 0, phase: 'choose' }
+                }
+                return item
+            })
+            return { ...state, orders: newOrders }
+        },
+        changeCommodityContent(state, action) {
+            const activeTabKey = state.activeKey
+            const content = action.payload || []
+            const newOrders = state.orders.map(item => {
+                if (item.key && item.key === activeTabKey) {
+                    return { ...item, content }
                 }
                 return item
             })

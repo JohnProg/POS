@@ -299,7 +299,6 @@ class DragSortingTable extends React.Component {
     }
 
     render() {
-        console.log(this.state.columns)
         return (
             <Table
                 bordered
