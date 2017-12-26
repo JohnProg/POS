@@ -1,9 +1,15 @@
 import { Badge } from 'antd'
 import moment from 'moment'
 import { fetchCommodityList } from '../services/api'
+import { GOODS_DISPLAY_TYPE } from '../constant'
 
 function getCurrentOrder(state) {
     return state.orders.filter(item => item.key === state.activeKey)[0]
+}
+
+const displayType = {
+    cardList: Symbol(),
+    table: Symbol(),
 }
 
 
@@ -18,6 +24,11 @@ export default {
     },
 
     effects: {
+        *changePaymentDataAndCheck(action, { put, select }) {
+            const paymentData = action.payload
+            yield put({type: 'changePaymentData', payload: paymentData})
+            yield put({type: 'checkPaymentData', })
+        },
         *clickGoodsItemTrue(action, { put, select }) {
             const commodity = yield select(state => state.commodity)
             const currentOrder = getCurrentOrder(commodity)
@@ -224,6 +235,7 @@ export default {
                     paymentData: [],
                     activePaymentDataIndex: null,
                     type: 'normal',
+                    display: GOODS_DISPLAY_TYPE.CARD_LIST,
                 },
             ]
             const activeKey = `orders-${count}`;
@@ -240,6 +252,17 @@ export default {
         changeTab(state, action) {
             const activeKey = action.payload
             return { ...state, activeKey }
+        },
+        changeDisplay(state, action) {
+            const activeTabKey = state.activeKey
+            const display = action.payload || []
+            const newOrders = state.orders.map(item => {
+                if (item.key && item.key === activeTabKey) {
+                    return { ...item, display }
+                }
+                return item
+            })
+            return { ...state, orders: newOrders }
         },
         saveCommodityList(state, action) {
             const activeTabKey = state.activeKey

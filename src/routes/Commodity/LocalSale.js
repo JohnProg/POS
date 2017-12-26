@@ -75,7 +75,6 @@ class LocalSale extends PureComponent {
                                 columns={columns}
                                 dataSource={paymentData}
                                 pagination={false}
-                                bordered={true}
                                 onRow={this.handleRowClick}
                                 rowClassName={(record, index) => {
                                     if (index === this.props.order.activePaymentDataIndex) {

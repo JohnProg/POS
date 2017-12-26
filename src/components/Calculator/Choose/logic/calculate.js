@@ -1,8 +1,11 @@
 import isNumber from '../../isNumber'
+import { routerRedux } from 'dva/router';
 
 function paymentHandler(activeTabKey, dispatch) {
     const phase = 'payment'
-    dispatch({type: 'commodity/changePhase', payload: { activeTabKey, phase } })
+    // dispatch({type: 'commodity/changePhase', payload: { activeTabKey, phase } })
+        dispatch(routerRedux.push('/pos/payment'));
+
 }
 
 function generateNewSelectedList(activeSelectedKey, selectedList, cache, number, type) {
@@ -113,7 +116,7 @@ function countHandler(dispatch, buttonName, activeTabKey, selectedList, selected
         }
         dispatch({type: 'commodity/changeSelectedList', payload: { activeTabKey, newSelectedList, activeSelectedKey }})
         if (tempActiveKey !== undefined) {
-            dispatch({type: 'commodity/changeActiveSelectedKey', payload: { activeTabKey, tempActiveKey }})
+            dispatch({type: 'commodity/changeActiveSelectedKey', payload: tempActiveKey })
         }
     }
     if (buttonName === '.') {

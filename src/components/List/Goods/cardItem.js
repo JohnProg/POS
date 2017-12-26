@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { Card, Button, Layout } from 'antd'
-import styles from './index.less'
+import styles from './cardItem.less'
 
 export default class CardItem extends PureComponent {
     handleClick = (key) => {

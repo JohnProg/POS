@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import { Button } from 'antd'
+import styles from './Cbutton.less'
 
 export default class Cbutton extends React.Component {
     static propTypes =  {
@@ -22,7 +23,6 @@ export default class Cbutton extends React.Component {
           name={name}
           datatype={datatype}
           className={className}
-          ghost
         >
             {this.props.children}
         </Button>

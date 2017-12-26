@@ -4,7 +4,8 @@ import { routerRedux, Link } from 'dva/router';
 import { Tabs, Button, Badge, Row, Col, Icon, } from 'antd'
 import moment from 'moment'
 import styles from './Choose.less'
-import GoodsList from '../../components/List/Goods/'
+// import GoodsList from '../../components/List/Goods/'
+import ChooseList from './ChooseList'
 import ChooseCalculator from '../../components/Calculator/Choose/'
 import SelectedGoods from '../../components/List/SelectedGoods/'
 import Payment from './Payment'
@@ -25,7 +26,7 @@ export default class Choose extends PureComponent {
     }
     onChange = (activeKey) => {
         if (activeKey === '+') {
-        this.props.dispatch({type: 'commodity/clickAddButton'})
+            this.props.dispatch({type: 'commodity/clickAddButton'})
             return
         }
         if (activeKey === '-') {
@@ -70,16 +71,16 @@ export default class Choose extends PureComponent {
             }
         }
         const leftHeader = (
-                        <div className={styles.logo}>
-                            <Link to="/">
-                                <h1>POS</h1>
-                            </Link>
-                        </div>
+            <div className={styles.logo}>
+                <Link to="/">
+                    <h1>POS</h1>
+                </Link>
+            </div>
         )
         const PosPhase = (item) => {
             switch (item.phase) {
                 case 'choose':
-                    return <GoodsList content={item.content} dispatch={this.props.dispatch} />
+                    return <ChooseList content={item.content} dispatch={this.props.dispatch} />
                 case 'payment':
                     return <Payment />
                 default:
@@ -96,18 +97,17 @@ export default class Choose extends PureComponent {
                     onChange={this.onChange}
                     activeKey={activeKey}
                     type="card"
-                    onEdit={this.onEdit}
                 >
                     {
                         orders.map(orderItem => (
-                        <TabPane tab={createTabTitle(orderItem.title)} key={orderItem.key}>
+                            <TabPane tab={createTabTitle(orderItem.title)} key={orderItem.key}>
                                 <div className={styles.tabContent}>
-                            {
-                                PosPhase(orderItem)
-                            }
+                                    {
+                                        PosPhase(orderItem)
+                                    }
                                 </div>
-                        </TabPane>
-                    ))
+                            </TabPane>
+                        ))
                     }
                 </Tabs>
             </div>

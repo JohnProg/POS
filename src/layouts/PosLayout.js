@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { Layout, Menu, Icon, Avatar, Dropdown, Tag, message, Spin, Tabs } from 'antd';
+import { Layout, Menu, Icon, Avatar, Dropdown, Tag, message, Spin, Tabs, Button, Badge } from 'antd';
+import ChooseList from '../routes/Commodity/ChooseList'
 import DocumentTitle from 'react-document-title';
 import { connect } from 'dva';
 import { Link, Route, Redirect, Switch } from 'dva/router';
@@ -41,7 +42,7 @@ const query = {
     },
 };
 
-class PosLayout extends React.PureComponent {
+class PosLayout extends PureComponent {
     static childContextTypes = {
         location: PropTypes.object,
         breadcrumbNameMap: PropTypes.object,
@@ -59,6 +60,9 @@ class PosLayout extends React.PureComponent {
             type: 'user/fetchCurrent',
         });
         this.innerHeight = window.innerHeight
+        if (this.props.commodity.orders.length === 0) {
+            this.props.dispatch({type: 'commodity/clickAddButton'})
+        }
     }
     getPageTitle() {
         const { location, getRouteData } = this.props;
@@ -113,8 +117,53 @@ class PosLayout extends React.PureComponent {
             });
         }
     }
+    onChange = (activeKey) => {
+        if (activeKey === '+') {
+            this.props.dispatch({type: 'commodity/clickAddButton'})
+            return
+        }
+        if (activeKey === '-') {
+            return
+        }
+        this.props.dispatch({type: 'commodity/changeTab', payload: activeKey})
+    }
+    add = () => {
+        this.props.dispatch({type: 'commodity/clickAddButton'})
+    }
+    remove = (currentIndex) => {
+        this.props.dispatch({type: 'commodity/clickRemoveButton', payload: currentIndex})
+    }
     render() {
-        const { currentUser, collapsed, fetchingNotices, getRouteData, activeKey, orders } = this.props;
+        const { currentUser, collapsed, fetchingNotices, getRouteData } = this.props;
+        const { orders, activeKey } = this.props.commodity || {}
+        const currentIndex = orders.findIndex(item => item.key === activeKey)
+        const createTabTitle = (title) => {
+            if (title === '+') {
+                return (
+                    <div className={styles.operationButton}>
+                        <Icon type='plus'/>
+                    </div>
+                )
+            }
+            if (title === '-') {
+                return (
+                    <div className={styles.operationButton}>
+                        <Icon type="minus" onClick={this.remove.bind(this, currentIndex)} />
+                    </div>
+                )
+            }
+            if (typeof title === 'number') {
+                const timeStamp = moment().format('x')
+                const localTime = moment().format('HH:mm')
+                const tabsBarElement = (
+                    <div className={styles.tabsBarContent}>
+                        <Badge count={title} overflowCount={1000} />
+                        <span>{localTime}</span>
+                    </div>
+                )
+                return tabsBarElement
+            }
+        }
         const menu = (
             <Menu className={styles.menu} selectedKeys={[]} onClick={this.onMenuClick}>
                 <Menu.Item disabled><Icon type="user" />个人中心</Menu.Item>
@@ -124,27 +173,55 @@ class PosLayout extends React.PureComponent {
             </Menu>
         );
         const noticeData = this.getNoticeData();
+        const leftHeader = (
+            <div className={styles.logo}>
+                <Link to="/">
+                    <h1>POS</h1>
+                </Link>
+            </div>
+        )
 
 
         const layout = (
             <Layout>
                 <Content style={{height: '100%' }}>
                     <div style={{ minHeight: 'calc(100vh - 260px)' }}>
-                        <Switch>
-                            {
-                                getRouteData('PosLayout').map(item =>
-                                    (
-                                        <Route
-                                            exact={item.exact}
-                                            key={item.path}
-                                            path={item.path}
-                                            component={item.component}
-                                        />
-                                    )
-                                )
-                            }
-                            <Route component={NotFound} />
-                        </Switch>
+                        <div
+                            className={styles.tabsWrapper}
+                        >
+                            <Tabs
+                                hideAdd
+                                tabBarExtraContent={leftHeader}
+                                onChange={this.onChange}
+                                activeKey={activeKey}
+                                type="card"
+                            >
+                                {
+                                    orders.map(orderItem => (
+                                        <TabPane tab={createTabTitle(orderItem.title)} key={orderItem.key}>
+                                            <div className={styles.tabContent}>
+                                                <Switch>
+                                                    {
+                                                        getRouteData('PosLayout').map(item =>
+                                                            (
+                                                                <Route
+                                                                    exact={item.exact}
+                                                                    key={item.path}
+                                                                    path={item.path}
+                                                                    component={item.component}
+                                                                />
+                                                            )
+                                                        )
+                                                    }
+                                                    <Route component={NotFound} />
+                                                </Switch>
+
+                                            </div>
+                                        </TabPane>
+                                    ))
+                                }
+                            </Tabs>
+                        </div>
                     </div>
                     <GlobalFooter
                         links={[{
@@ -185,4 +262,5 @@ export default connect(state => ({
     collapsed: state.global.collapsed,
     fetchingNotices: state.global.fetchingNotices,
     notices: state.global.notices,
+    commodity: state.commodity,
 }))(PosLayout);

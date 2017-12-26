@@ -65,6 +65,7 @@ export default class CoverCardList extends PureComponent {
   }
 
   render() {
+      console.log(routerRedux)
     const { list: { list = [], loading }, form } = this.props;
     const { getFieldDecorator } = form;
 

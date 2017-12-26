@@ -17,9 +17,13 @@ export const getNavData = app => [
         children: [
             {
                 name: 'Point of Sale',
-                icon: 'shopping-cart',
-                path: 'pos',
-                component: dynamicWrapper(app, ['commodity'], () => import('../routes/Commodity/Choose')),
+                icon: 'shopping-card',
+                path: 'pos/choose',
+                component: dynamicWrapper(app, ['commodity'], () => import('../routes/Commodity/ChooseList')),
+            },
+            {
+                path: 'pos/payment',
+                component: dynamicWrapper(app, ['commodity'], () => import('../routes/Commodity/Payment')),
             },
         ],
     },

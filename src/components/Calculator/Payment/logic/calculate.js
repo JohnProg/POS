@@ -27,14 +27,14 @@ function numberHandler(oldCache, buttonName, activePaymentDataIndex, paymentData
     }
     const number = cache - 0
     const newPaymentData = generateNewPaymentData(paymentData, activePaymentDataIndex, cache, number)
-    dispatch({type: 'commodity/changePaymentData', payload: newPaymentData})
+    dispatch({type: 'commodity/changePaymentDataAndCheck', payload: newPaymentData})
 }
 function clearHandler(oldCache, buttonName, activePaymentDataIndex, paymentData, dispatch) {
     if (!oldCache) { return }
     const cache = null
     let number = 0
     const newPaymentData = generateNewPaymentData(paymentData, activePaymentDataIndex, cache, number)
-    dispatch({type: 'commodity/changePaymentData', payload: newPaymentData})
+    dispatch({type: 'commodity/changePaymentDataAndCheck', payload: newPaymentData})
 }
 
 function dotHandler(oldCache, buttonName, activePaymentDataIndex, paymentData, dispatch) {
@@ -49,7 +49,7 @@ function dotHandler(oldCache, buttonName, activePaymentDataIndex, paymentData, d
         number = cache - 0
     }
     const newPaymentData = generateNewPaymentData(paymentData, activePaymentDataIndex, cache, number)
-    dispatch({type: 'commodity/changePaymentData', payload: newPaymentData})
+    dispatch({type: 'commodity/changePaymentDataAndCheck', payload: newPaymentData})
 }
 
 function delHandler(oldCache, buttonName, activePaymentDataIndex, paymentData, dispatch) {
@@ -63,7 +63,7 @@ function delHandler(oldCache, buttonName, activePaymentDataIndex, paymentData, d
             number = cache - 0
         }
     const newPaymentData = generateNewPaymentData(paymentData, activePaymentDataIndex, cache, number)
-    dispatch({type: 'commodity/changePaymentData', payload: newPaymentData})
+    dispatch({type: 'commodity/changePaymentDataAndCheck', payload: newPaymentData})
 }
 
 
