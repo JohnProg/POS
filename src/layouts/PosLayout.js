@@ -1,11 +1,10 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Layout, Menu, Icon, Avatar, Dropdown, Tag, message, Spin, Tabs, Button, Badge } from 'antd';
-import ChooseList from '../routes/Commodity/ChooseList'
+import ChooseList from '../routes/Pos/ChooseList'
 import DocumentTitle from 'react-document-title';
 import { connect } from 'dva';
 import { Link, Route, Redirect, Switch } from 'dva/router';
-import moment from 'moment';
 import groupBy from 'lodash/groupBy';
 import { ContainerQuery } from 'react-container-query';
 import classNames from 'classnames';
@@ -16,6 +15,10 @@ import NotFound from '../routes/Exception/404';
 import styles from './PosLayout.less';
 import ChooseCalculator from '../components/Calculator/Choose/'
 import SelectedGoods from '../components/List/SelectedGoods/'
+import { POS_TAB_TYPE } from '../constant'
+import classnames from 'classnames'
+
+let cls = classnames.bind(styles)
 
 const { Header, Sider, Content, Footer } = Layout;
 const { SubMenu } = Menu;
@@ -61,7 +64,7 @@ class PosLayout extends PureComponent {
         });
         this.innerHeight = window.innerHeight
         if (this.props.commodity.orders.length === 0) {
-            this.props.dispatch({type: 'commodity/clickAddButton'})
+            this.props.dispatch({type: 'commodity/clickAddButton', payload: POS_TAB_TYPE.SALE})
         }
     }
     getPageTitle() {
@@ -119,16 +122,13 @@ class PosLayout extends PureComponent {
     }
     onChange = (activeKey) => {
         if (activeKey === '+') {
-            this.props.dispatch({type: 'commodity/clickAddButton'})
+            this.props.dispatch({type: 'commodity/clickAddButton', payload: POS_TAB_TYPE.SALE})
             return
         }
         if (activeKey === '-') {
             return
         }
-        this.props.dispatch({type: 'commodity/changeTab', payload: activeKey})
-    }
-    add = () => {
-        this.props.dispatch({type: 'commodity/clickAddButton'})
+        this.props.dispatch({type: 'commodity/changeActiveTabKey', payload: activeKey})
     }
     remove = (currentIndex) => {
         this.props.dispatch({type: 'commodity/clickRemoveButton', payload: currentIndex})
@@ -137,7 +137,12 @@ class PosLayout extends PureComponent {
         const { currentUser, collapsed, fetchingNotices, getRouteData } = this.props;
         const { orders, activeKey } = this.props.commodity || {}
         const currentIndex = orders.findIndex(item => item.key === activeKey)
-        const createTabTitle = (title) => {
+        const createTabTitle = (title, type, key, currentTime) => {
+            const tabsBarContentCls = cls({
+                [styles.tabsBarContent]: true,
+                [styles.tabsBarContentAllocate]: type === POS_TAB_TYPE.ALLOCATEANDTRANSFER,
+            })
+            const activeTabKey = activeKey
             if (title === '+') {
                 return (
                     <div className={styles.operationButton}>
@@ -153,12 +158,12 @@ class PosLayout extends PureComponent {
                 )
             }
             if (typeof title === 'number') {
-                const timeStamp = moment().format('x')
-                const localTime = moment().format('HH:mm')
                 const tabsBarElement = (
-                    <div className={styles.tabsBarContent}>
-                        <Badge count={title} overflowCount={1000} />
-                        <span>{localTime}</span>
+                    <div className={tabsBarContentCls}>
+                        <Badge count={title} overflowCount={1000} style={{background: '#393939'}} />
+                        {
+                            activeTabKey === key && <span>{currentTime}</span>
+                        }
                     </div>
                 )
                 return tabsBarElement
@@ -198,7 +203,7 @@ class PosLayout extends PureComponent {
                             >
                                 {
                                     orders.map(orderItem => (
-                                        <TabPane tab={createTabTitle(orderItem.title)} key={orderItem.key}>
+                                        <TabPane tab={createTabTitle(orderItem.title, orderItem.type, orderItem.key, orderItem.currentTime)} key={orderItem.key}>
                                             <div className={styles.tabContent}>
                                                 <Switch>
                                                     {
@@ -215,7 +220,6 @@ class PosLayout extends PureComponent {
                                                     }
                                                     <Route component={NotFound} />
                                                 </Switch>
-
                                             </div>
                                         </TabPane>
                                     ))

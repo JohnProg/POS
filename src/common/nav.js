@@ -17,13 +17,13 @@ export const getNavData = app => [
         children: [
             {
                 name: 'Point of Sale',
-                icon: 'shopping-card',
+                icon: 'shopping-cart',
                 path: 'pos/choose',
-                component: dynamicWrapper(app, ['commodity'], () => import('../routes/Commodity/ChooseList')),
+                component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/ChooseList')),
             },
             {
                 path: 'pos/payment',
-                component: dynamicWrapper(app, ['commodity'], () => import('../routes/Commodity/Payment')),
+                component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/Payment')),
             },
         ],
     },
@@ -47,10 +47,12 @@ export const getNavData = app => [
                     {
                         name: '数据统计',
                         path: 'statistics',
+                        component: dynamicWrapper(app, ['rule'], () => import('../routes/DailyClosing/Statistics')),
                     },
                     {
-                        name: '现金收款统计',
+                        name: '现金收款复查',
                         path: 'cashStatistics',
+                        component: dynamicWrapper(app, ['form'], () => import('../routes/DailyClosing/CashStatistics')),
                     },
                 ]
             },
@@ -62,12 +64,14 @@ export const getNavData = app => [
             {
                 name: '历史订单',
                 icon: 'exception',
-                path: 'historyOrder',
+                path: 'historyOrders',
+                component: dynamicWrapper(app, ['rule'], () => import('../routes/HistoryOrders/HistoryOrdersTable')),
             },
             {
                 name: '调拨管理',
                 icon: 'notification',
                 path: 'allocateAndTransfer',
+                component: dynamicWrapper(app, ['commodity'], () => import('../routes/Allocate/AllocateTable')),
             },
             {
                 name: 'Dashboard',

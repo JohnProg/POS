@@ -194,6 +194,14 @@ export default function calculate(commodity, dispatch, buttonName) {
         console.log('customer')
         return
     }
+    if (buttonName === 'warehouse') {
+        console.log('warehouse')
+        return
+    }
+    if (buttonName === 'allocateAndTransfer') {
+        console.log('allocateAndTransfer')
+        return
+    }
     if (buttonName === 'payment') {
         paymentHandler(activeTabKey, dispatch)
     }

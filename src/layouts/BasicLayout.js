@@ -347,7 +347,7 @@ class BasicLayout extends React.PureComponent {
               ) : <Spin size="small" style={{ marginLeft: 8 }} />}
             </div>
           </Header>
-          <Content style={{height: '100%' }}>
+          <Content style={{height: '100%', margin: '24px 24px 0px' }}>
             <div style={{ minHeight: 'calc(100vh - 260px)' }}>
               <Switch>
                 {

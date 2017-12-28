@@ -1,4 +1,3 @@
-import { Badge } from 'antd'
 import moment from 'moment'
 import { fetchCommodityList } from '../services/api'
 import { GOODS_DISPLAY_TYPE } from '../constant'
@@ -180,10 +179,12 @@ export default {
             })
             yield put({type: 'changeTotalPrice', payload: totalPrice})
         },
-        *clickAddButton(_, { put, call, select }) {
+        *clickAddButton(action, { put, call, select }) {
+            const tabType = action.payload
             const commodity = yield select(state => state.commodity)
             let count = ++commodity.newTabIndex
-            yield put({type: 'addTab', payload: count})
+            const currentTime = moment().format('HH:mm')
+            yield put({type: 'addTab', payload: {count, tabType, currentTime}})
             yield put({type: 'initOperationButton'})
             // const { activeKey }= yield select(state => state.commodity)
             const { list } = yield call(fetchCommodityList)
@@ -207,7 +208,7 @@ export default {
             if (orders.length === 3) {
                 activeKey = orders[currentIndex].key
             }
-            yield put({type: 'changeTab', payload: activeKey})
+            yield put({type: 'changeActiveTabKey', payload: activeKey})
         },
     },
 
@@ -222,7 +223,7 @@ export default {
             return { ...state, orders }
         },
         addTab(state, action) {
-            const count = action.payload
+            const { count, tabType, currentTime } = action.payload
             const currentActiveKey = state.activeKey
             const goodsOrders = state.orders.filter(item => typeof item.title !== 'string' )
             const orders = [...goodsOrders,
@@ -234,8 +235,9 @@ export default {
                     paymentDataIndex: 0,
                     paymentData: [],
                     activePaymentDataIndex: null,
-                    type: 'normal',
+                    type: tabType,
                     display: GOODS_DISPLAY_TYPE.CARD_LIST,
+                    currentTime,
                 },
             ]
             const activeKey = `orders-${count}`;
@@ -249,7 +251,7 @@ export default {
             }
             return state
         },
-        changeTab(state, action) {
+        changeActiveTabKey(state, action) {
             const activeKey = action.payload
             return { ...state, activeKey }
         },

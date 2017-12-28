@@ -3,23 +3,44 @@ import styles from './index.less'
 import { connect } from 'dva'
 import Cbutton from '../Cbutton'
 import calculate from './logic/calculate'
+import { POS_TAB_TYPE } from '../../../constant'
 
 
 class ChooseCalculator extends PureComponent {
     clickHandler = (buttonName) => {
         calculate(this.props.commodity, this.props.dispatch, buttonName)
     }
+    createActionPad = (orderType) => {
+        switch (orderType) {
+            case POS_TAB_TYPE.ALLOCATEANDTRANSFER:
+                return (
+                    <div>
+                        <Cbutton name="warehouse" clickHandler={this.clickHandler}>仓库</Cbutton>
+                        <Cbutton name="allocateAndTransfer" clickHandler={this.clickHandler}>发起调拨</Cbutton>
+                    </div>
+                )
+            default:
+                return (
+                    <div>
+                        <Cbutton name="customer" clickHandler={this.clickHandler}>客户</Cbutton>
+                        <Cbutton name="payment" clickHandler={this.clickHandler}>付款</Cbutton>
+                    </div>
+                )
+        }
+    }
     render() {
         const { orders, activeTabKey } = this.props
         const currentOrder = Array.isArray(orders) && orders.filter(item => (item.key === activeTabKey))[0] || {}
+        const orderType = currentOrder.type
         const { selectedList = [], activeKey } = currentOrder
         const selectedItem = selectedList.filter(item => item.Key === activeKey)[0] || {}
         const calculateType = selectedItem.CalculateType
         return (
             <div className={styles.calcWrapper}>
                 <div className={styles.actionPad}>
-                    <Cbutton name="customer" clickHandler={this.clickHandler}>客户</Cbutton>
-                    <Cbutton name="payment" clickHandler={this.clickHandler}>付款</Cbutton>
+                    {
+                        this.createActionPad(orderType)
+                    }
                 </div>
                 <div className={styles.numPad}>
                     <Cbutton name="1"  clickHandler={this.clickHandler} >1</Cbutton>

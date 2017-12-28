@@ -32,7 +32,7 @@ export default class Choose extends PureComponent {
         if (activeKey === '-') {
             return
         }
-        this.props.dispatch({type: 'commodity/changeTab', payload: activeKey})
+        this.props.dispatch({type: 'commodity/changeActiveTabKey', payload: activeKey})
     }
     add = () => {
         this.props.dispatch({type: 'commodity/clickAddButton'})
