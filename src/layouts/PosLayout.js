@@ -10,7 +10,6 @@ import { ContainerQuery } from 'react-container-query';
 import classNames from 'classnames';
 import Debounce from 'lodash-decorators/debounce';
 import NoticeIcon from '../components/NoticeIcon';
-import GlobalFooter from '../components/GlobalFooter';
 import NotFound from '../routes/Exception/404';
 import styles from './PosLayout.less';
 import ChooseCalculator from '../components/Calculator/Choose/'
@@ -134,6 +133,7 @@ class PosLayout extends PureComponent {
         this.props.dispatch({type: 'commodity/clickRemoveButton', payload: currentIndex})
     }
     render() {
+        console.log('this.props', this.props)
         const { currentUser, collapsed, fetchingNotices, getRouteData } = this.props;
         const { orders, activeKey } = this.props.commodity || {}
         const currentIndex = orders.findIndex(item => item.key === activeKey)
@@ -227,26 +227,6 @@ class PosLayout extends PureComponent {
                             </Tabs>
                         </div>
                     </div>
-                    <GlobalFooter
-                        links={[{
-                            title: 'Pro 首页',
-                            href: 'http://pro.ant.design',
-                            blankTarget: true,
-                        }, {
-                            title: 'GitHub',
-                            href: 'https://github.com/ant-design/ant-design-pro',
-                            blankTarget: true,
-                        }, {
-                            title: 'Ant Design',
-                            href: 'http://ant.design',
-                            blankTarget: true,
-                        }]}
-                        copyright={
-                            <div>
-                                Copyright <Icon type="copyright" /> Orssica
-                            </div>
-                        }
-                    />
                 </Content>
             </Layout>
         );
