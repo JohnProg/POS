@@ -307,15 +307,19 @@ export default class TableList extends PureComponent {
                 children: [
                     {
                         title: '流水号',
+                        dataIndex: 'SertialNumber',
                     },
                     {
                         title: '收银员',
+                        dataIndex: 'Cashier'
                     },
                     {
                         title: '应收金额',
+                        dataIndex: 'ReceivableAmounts'
                     },
                     {
-                        title: '失收金额',
+                        title: '实收金额',
+                        dataIndex: 'RealAmounts'
                     }
                 ]        
             },
@@ -324,9 +328,11 @@ export default class TableList extends PureComponent {
                 children: [
                     {
                         title: '收款金额',
+                        dataIndex: 'ReceivedAmounts',
                     },
                     {
                         title: '找零金额',
+                        dataIndex: 'GiveChangeAmounts',
                     }
                 ]
             },
@@ -335,18 +341,23 @@ export default class TableList extends PureComponent {
                 children: [
                     {
                         title: '现金',
+                        dataIndex: 'Cash',
                     },
                     {
                         title: '刷卡',
+                        dataIndex: 'SwipeCard',
                     },
                     {
                         title: '储值卡',
+                        dataIndex: 'SavingCard',
                     },
                     {
                         title: '外币',
+                        dataIndex: 'ForeignCurrency',
                     },
                     {
                         title: '其他付款',
+                        dataIndex: 'Other',
                     },
                 ]
             },
@@ -355,9 +366,11 @@ export default class TableList extends PureComponent {
                 children: [
                     {
                         title: '日期',
+                        dataIndex: 'Date',
                     },
                     {
                         title: '时间',
+                        dataIndex: 'Time',
                     },
                 ]
             },
@@ -366,53 +379,68 @@ export default class TableList extends PureComponent {
                 children: [
                     {
                         title: '优惠卡',
+                        dataIndex: 'DiscountCard',
                     },
                     {
-                        title: '客户编号'
+                        title: '客户编号',
+                        dataIndex: 'CustomerIdentifier',
                     }
                 ]
             },
             {
                 title: '操作',
+                dataIndex: 'Operation',
             },
         ];
 
         const goodsColumns = [
             {
                 title: '商品编码',
+                dataIndex: 'GoodsCode',
             },
             {
                 title: '条码',
+                dataIndex: 'BarCode',
             },
             {
                 title: '品名',
+                dataIndex: 'GoodsName',
             },
             {
                 title: '单位',
+                dataIndex: 'Unit',
             },
             {
                 title: '数量',
+                dataIndex: 'Count',
             },
             {
                 title: '进货金额',
+                dataIndex: 'ImportAmounts',
             },
             {
                 title: '零售金额',
+                dataIndex: 'RetailAmounts',
             },
             {
                 title: '销售金额',
+                dataIndex: 'SaleAmounts',
             },
             {
                 title: '会员金额',
+                dataIndex: 'VipAmounts',
             },
             {
                 title: '折扣',
+                dataIndex: 'Discount',
             },
             {
                 title: '毛利',
+                dataIndex: 'GrossProfit',
             },
             {
-                title: '营业员'
+                title: '营业员',
+                dataIndex: 'Assistant',
             },
         ]
 

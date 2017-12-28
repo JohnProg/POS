@@ -10,7 +10,7 @@ import HeaderSearch from '../../components/HeaderSearch';
 import { GOODS_DISPLAY_TYPE } from '../../constant'
 import CardList from '../../components/List/Goods/'
 import CardTable from '../../components/Table/Goods/'
-import classNames from 'classNames'
+import classNames from 'classnames'
 
 
 const { Header, Sider, Content } = Layout;
