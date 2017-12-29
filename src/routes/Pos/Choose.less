@@ -1,78 +1,154 @@
-.tabsWrapper {
-    background-color: #F0EEEE;
-    :global(.ant-tabs-bar) {
-        background-color: #393939;
-        margin-bottom: 0px !important;
-        position: fixed;
-        width: 100%;
-        z-index: 1000;
-    }
-    :global(.ant-tabs-nav) {
-        height: 48px;
-    }
-    :global(.ant-tabs-nav-container) {
-        height: 48px !important;
-    }
-    :global(.ant-tabs-tab) {
-        line-height: 48px !important;
-        padding: 0px !important;
-    }
-    :global(.ant-badge) {
-        bottom: 2px;
-    }
-    :global(.ant-tabs-extra-content) {
-        float: left !important;
-        width: 440px;
-    }
+@import "~antd/lib/style/themes/default.less";
+/*  */
+.leftContent {
+    height: calc(100vh - 235px - 48px) !important;
+    overflow: auto;
 }
-.tabsBarContent {
-    padding-left: 10px;
-    padding-right: 10px;
-    vertical-align: middle;
-    line-height: 48px;
+.calculator {
+    height: 235px;
 }
-.tabContent {
-    margin-top: 48px;
+.rightContent {
+    padding-left: 440px;
+}
+.commodityListWrapper {
+    padding: 10px;
+    /* margin: 0 auto;  */
+    /* margin-left: 440px; */
+    .commodityItem {
+        margin: 8px;
+        display: inline-block;
+        position: relative;
+        font-size: 11px;
+        height: auto;
+        text-align: left;
+        overflow: hidden;
+        cursor: pointer;
+        .imgWrapper {
+            width: 120px;
+            text-align: center;
+        }
+        .commodityName {
+            width: 120px;
+            text-overflow: ellipsis;
+            overflow-x: hidden;
+            white-space: nowrap;
+        }
+        &:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, .8);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+        &[dataClicked="true"]::after {
+            animation: ripple 1s ease-out;
+            transform: scale(40, 40);
+            opacity: 1;
+        }
+    }
 }
 
-.operationButton {
-    vertical-align: middle;
-    line-height: 48px;
-    font-weight: 800;
-    i {
-        margin-left: 0px !important;
-        margin-right: 0px !important;
-        padding-left: 10px;
-        padding-right: 10px;
+.priceTag {
+    position: absolute;
+    vertical-align: top;
+    right: 2px;
+    top: 2px;
+    line-height: 13px;
+    background-color: #7f82ac;
+    border-radius: 2px;
+    padding: 2px 5px;
+    color: #fff;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 1;
+    }
+    30% {
+        transform: scale(70, 70);
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(150, 150);
     }
 }
-.localTime {
-    display: inline-block;
-    height: 20px;
-    line-height: 20px;
-    margin-left: 5px;
+.sider {
+    background-color: #fff;
+    height: 100vh;
+    border-right: 3px solid #393939;
+    /* box-shadow: 2px 0 6px rgba(0, 21, 41, .35); */
+    position: fixed;
+    top: 0;
+    padding-top: 48px;
+    z-index: 10;
+    :global(.ant-layout-sider-children) {
+        display: flex;
+        flex-direction: column;
+    }
 }
-.logo {
-    height: 48px;
+
+.header {
+    padding: 0 12px 0 0;
+    background: #fff;
+    /* box-shadow: 0 1px 4px rgba(0, 21, 41, .08); */
+    border-bottom: 1px solid #BFBFBF;
     position: relative;
+    height: 48px;
+}
+.tabHeader {
+    padding: 0 12px 0 0;
+    /* background: #fff; */
+    box-shadow: 0 1px 4px rgba(0, 21, 41, .08);
+    position: relative;
+    height: 36px;
+}
+.trigger {
+    font-size: 20px;
+    height: 100%;
     line-height: 48px;
-    padding-left: 4px;
+    cursor: pointer;
     transition: all .3s;
-    /* background: #002140; */
-    overflow: hidden;
-    img {
-        display: inline-block;
-        vertical-align: middle;
-        height: 32px;
-    }
-    h1 {
-        color: #fff;
-        display: inline-block;
-        vertical-align: middle;
-        font-size: 20px;
-        margin: 0 0 0 12px;
-        font-family: 'Myriad Pro', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-        font-weight: 600;
+    padding: 0 12px;
+    &:hover {
+        background: @primary-1;
     }
 }
+.activeTrigger {
+    background: @primary-1;
+}
 
+    .right {
+        float: right;
+        height: 100%;
+        .action {
+            cursor: pointer;
+            padding: 0 12px;
+            display: inline-block;
+            transition: all .3s;
+            height: 100%;
+            line-height: 48px;
+            > i {
+                font-size: 16px;
+                vertical-align: middle;
+            }
+            &:global(.ant-popover-open),
+            &:hover {
+                background: @primary-1;
+            }
+        }
+        .search {
+            padding: 0;
+            margin: 0 12px;
+            &:hover {
+                background: transparent;
+            }
+        }
+    }

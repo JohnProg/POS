@@ -4,8 +4,8 @@ import { DragDropContext, DragSource, DropTarget } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
 import { connect } from 'dva'
-import StandardFormRow from '../../StandardFormRow';
-import TagSelect from '../../TagSelect';
+import StandardFormRow from '../../../components/StandardFormRow';
+import TagSelect from '../../../components/TagSelect';
 
 const { Panel } = Collapse
 

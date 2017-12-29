@@ -19,12 +19,16 @@ export const getNavData = app => [
                 name: 'Point of Sale',
                 icon: 'shopping-cart',
                 path: 'pos',
-                component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/ChooseList')),
+                component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/Choose')),
+                exact: false,
                 children: [
                     {
-                        name: 'list',
                         path: 'pos/list',
-                        component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/List')),
+                        component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/GoodsList')),
+                    },
+                    {
+                        path: 'pos/table',
+                        component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/GoodsTable')),
                     }
                 ]
             },

@@ -1,116 +1,115 @@
 import React, { PureComponent } from 'react';
+import { Card, Button, Layout, Icon } from 'antd'
+import CardItem from '../../components/List/Goods/cardItem'
 import { connect } from 'dva'
-import { routerRedux, Link } from 'dva/router';
-import { Tabs, Button, Badge, Row, Col, Icon, } from 'antd'
-import moment from 'moment'
 import styles from './Choose.less'
-// import GoodsList from '../../components/List/Goods/'
-import ChooseList from './ChooseList'
 import ChooseCalculator from '../../components/Calculator/Choose/'
 import SelectedGoods from '../../components/List/SelectedGoods/'
-import Payment from './Payment'
+import HeaderSearch from '../../components/HeaderSearch';
+import GoodsList from './GoodsList'
+import GoodsTable from './GoodsTable'
+import CardTable from '../../components/Table/Goods/'
+import classNames from 'classnames'
+import { Link, Route, Redirect, Switch } from 'dva/router';
+import NotFound from '../Exception/404';
+import { routerRedux } from 'dva/router';
 
-const { TabPane } = Tabs
 
+const { Header, Sider, Content } = Layout;
+let cx = classNames.bind(styles)
 
-@connect(state => ({
-    commodity: state.commodity,
-}))
+@connect(state => ({commodity: state.commodity}))
 
-export default class Choose extends PureComponent {
-    componentDidMount() {
-        if (this.props.commodity.orders.length === 0) {
-            this.props.dispatch({type: 'commodity/clickAddButton'})
+export default class CommodityList extends PureComponent {
+    constructor(props) {
+        super(props)
+        this.state = {
+            display: false,
         }
-
     }
-    onChange = (activeKey) => {
-        if (activeKey === '+') {
-            this.props.dispatch({type: 'commodity/clickAddButton'})
-            return
-        }
-        if (activeKey === '-') {
-            return
-        }
-        this.props.dispatch({type: 'commodity/changeActiveTabKey', payload: activeKey})
-    }
-    add = () => {
-        this.props.dispatch({type: 'commodity/clickAddButton'})
-    }
-    remove = (currentIndex) => {
-        this.props.dispatch({type: 'commodity/clickRemoveButton', payload: currentIndex})
+    toggleCollapse = () => {
+        this.setState({
+            display: !this.state.display,
+        })
+        console.log(this.state.display)
     }
     render() {
-        const { orders, activeKey } = this.props.commodity || {}
-        const currentIndex = orders.findIndex(item => item.key === activeKey)
-        const createTabTitle = (title) => {
-            if (title === '+') {
-                return (
-                    <div className={styles.operationButton}>
-                        <Icon type='plus'/>
-                    </div>
-                )
-            }
-            if (title === '-') {
-                return (
-                    <div className={styles.operationButton}>
-                        <Icon type="minus" onClick={this.remove.bind(this, currentIndex)} />
-                    </div>
-                )
-            }
-            if (typeof title === 'number') {
-                const timeStamp = moment().format('x')
-                const localTime = moment().format('HH:mm')
-                const tabsBarElement = (
-                    <div className={styles.tabsBarContent}>
-                        <Badge count={title} overflowCount={1000} />
-                        <span>{localTime}</span>
-                    </div>
-                )
-                return tabsBarElement
-            }
-        }
-        const leftHeader = (
-            <div className={styles.logo}>
-                <Link to="/">
-                    <h1>POS</h1>
-                </Link>
-            </div>
-        )
-        const PosPhase = (item) => {
-            switch (item.phase) {
-                case 'choose':
-                    return <ChooseList content={item.content} dispatch={this.props.dispatch} />
-                case 'payment':
-                    return <Payment />
-                default:
-                    return
-            }
-        }
+        const { commodity, dispatch } = this.props
+        const view = this.props.location && this.props.location.pathname.replace('/pos/', '')
+        const currentOrder = commodity.orders.filter(item => (item.key === commodity.activeKey))[0]
+        const { content, display } = currentOrder
+        let displayTable = cx({
+            [styles.trigger]: true,
+            [styles.activeTrigger]: view === 'table'
+        })
+        let displayCardList = cx({
+            [styles.trigger]: true,
+            [styles.activeTrigger]: view === 'list'
+        })
         return (
-            <div
-                className={styles.tabsWrapper}
-            >
-                <Tabs
-                    hideAdd
-                    tabBarExtraContent={leftHeader}
-                    onChange={this.onChange}
-                    activeKey={activeKey}
-                    type="card"
+            <Layout>
+                <Sider
+                    width={440}
+                    className={styles.sider}
                 >
-                    {
-                        orders.map(orderItem => (
-                            <TabPane tab={createTabTitle(orderItem.title)} key={orderItem.key}>
-                                <div className={styles.tabContent}>
-                                    {
-                                        PosPhase(orderItem)
-                                    }
-                                </div>
-                            </TabPane>
-                        ))
-                    }
-                </Tabs>
-            </div>
-        );
+                    <Content
+                        className={styles.leftContent}
+                    >
+                        <SelectedGoods />
+                    </Content>
+                    <div
+                        className={styles.calculator}
+                    >
+                        <ChooseCalculator />
+                    </div>
+                </Sider>
+                <Content className={styles.rightContent}>
+                    <div className={styles.header}>
+                        <Icon
+                            className={styles.trigger}
+                            type="home"
+                        />
+                        <Icon
+                            className={displayCardList}
+                            type="table"
+                            onClick={() => {dispatch(routerRedux.push('/pos/list'))}}
+                        />
+                        <Icon
+                            className={displayTable}
+                            type="profile"
+                            onClick={() => {dispatch(routerRedux.push('/pos/table'))}}
+                        />
+                        <a style={{ marginLeft: 8 }} onClick={this.toggleCollapse}>
+                            配置表格 <Icon type="down" />
+                        </a>
+                        <div className={styles.right}>
+                            <HeaderSearch
+                                className={`${styles.action} ${styles.search}`}
+                                placeholder="商品搜索"
+                                dataSource={['搜索提示一', '搜索提示二', '搜索提示三']}
+                                onSearch={(value) => {
+                                    console.log('input', value); // eslint-disable-line
+                                }}
+                                onPressEnter={(value) => {
+                                    console.log('enter', value); // eslint-disable-line
+                                }}
+                            />
+                        </div>
+                    </div>
+                    <div className={styles.tabHeader}></div>
+                    <div className={styles.commodityListWrapper}>
+
+                        {
+
+                        <Switch>
+                            <Route path="/pos/list" render={() => <GoodsList content={content} dispatch={dispatch} />}  />
+                            <Route path="/pos/table" render={() => <GoodsTable content={content} dispatch={dispatch} />}  />
+                            <Redirect to="/pos/list" />
+                        </Switch>
+                        }
+                    </div>
+                </Content>
+            </Layout>
+        )
     }
 }

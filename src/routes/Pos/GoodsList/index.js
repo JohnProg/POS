@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import CardItem from './CardItem'
-import styles from './List.less'
+import styles from './index.less'
 
 
 export default class GoodsList extends PureComponent {
