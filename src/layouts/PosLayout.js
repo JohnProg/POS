@@ -180,8 +180,8 @@ class PosLayout extends PureComponent {
             <div className={styles.logo}>
                 <Link to="/">
                     <h1>POS</h1>
-            </Link>
-        </div>
+                </Link>
+            </div>
         )
 
 
@@ -189,52 +189,52 @@ class PosLayout extends PureComponent {
             <Layout>
                 <Content style={{height: '100%' }}>
                     <div style={{ minHeight: 'calc(100vh - 260px)' }}>
-            <div
-                className={styles.tabsWrapper}
-            >
-            <Tabs
-                hideAdd
-                tabBarExtraContent={leftHeader}
-                onChange={this.onChange}
-                activeKey={activeKey}
-                type="card"
-            >
-                {
-                    orders.map(orderItem => (
-                        <TabPane tab={createTabTitle(orderItem.title, orderItem.type, orderItem.key, orderItem.currentTime)} key={orderItem.key}>
-                            <div className={styles.tabContent}>
-                                <Switch>
-                                    {
-                                        getRouteData('PosLayout').map(item =>
-                                            (
-                                                <Route
-                                                    exact={item.exact}
-                                                    key={item.path}
-                                                    path={item.path}
-                                                    component={item.component}
-                                                />
-                                            )
-                                        )
-                                    }
-                                    <Route component={NotFound} />
-                                </Switch>
-                            </div>
-                        </TabPane>
-                    ))
-                }
-            </Tabs>
-        </div>
-    </div>
-            </Content>
-        </Layout>
+                        <div
+                            className={styles.tabsWrapper}
+                        >
+                            <Tabs
+                                hideAdd
+                                tabBarExtraContent={leftHeader}
+                                onChange={this.onChange}
+                                activeKey={activeKey}
+                                type="card"
+                            >
+                                {
+                                    orders.map(orderItem => (
+                                        <TabPane tab={createTabTitle(orderItem.title, orderItem.type, orderItem.key, orderItem.currentTime)} key={orderItem.key}>
+                                            <div className={styles.tabContent}>
+                                                <Switch>
+                                                    {
+                                                        getRouteData('PosLayout').map(item =>
+                                                            (
+                                                                <Route
+                                                                    exact={item.exact}
+                                                                    key={item.path}
+                                                                    path={item.path}
+                                                                    component={item.component}
+                                                                />
+                                                            )
+                                                        )
+                                                    }
+                                                    <Route component={NotFound} />
+                                                </Switch>
+                                            </div>
+                                        </TabPane>
+                                    ))
+                                }
+                            </Tabs>
+                        </div>
+                    </div>
+                </Content>
+            </Layout>
         );
 
         return (
             <DocumentTitle title={this.getPageTitle()}>
-            <ContainerQuery query={query}>
-                {params => <div className={classNames(params)}>{layout}</div>}
-            </ContainerQuery>
-        </DocumentTitle>
+                <ContainerQuery query={query}>
+                    {params => <div className={classNames(params)}>{layout}</div>}
+                </ContainerQuery>
+            </DocumentTitle>
         );
     }
 }

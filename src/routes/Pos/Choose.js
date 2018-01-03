@@ -8,7 +8,7 @@ import SelectedGoods from '../../components/List/SelectedGoods/'
 import HeaderSearch from '../../components/HeaderSearch';
 import GoodsList from './GoodsList'
 import GoodsTable from './GoodsTable'
-import CardTable from '../../components/Table/Goods/'
+import Payment from './Payment'
 import classNames from 'classnames'
 import { Link, Route, Redirect, Switch } from 'dva/router';
 import NotFound from '../Exception/404';
@@ -31,7 +31,6 @@ export default class CommodityList extends PureComponent {
         this.setState({
             display: !this.state.display,
         })
-        console.log(this.state.display)
     }
     render() {
         const { commodity, dispatch } = this.props
@@ -101,11 +100,10 @@ export default class CommodityList extends PureComponent {
 
                         {
 
-                        <Switch>
-                            <Route path="/pos/list" render={() => <GoodsList content={content} dispatch={dispatch} />}  />
-                            <Route path="/pos/table" render={() => <GoodsTable content={content} dispatch={dispatch} />}  />
-                            <Redirect to="/pos/list" />
-                        </Switch>
+                        // <Switch>
+                        //     <Route path="/pos/list" render={() => <GoodsList content={content} dispatch={dispatch} />}  />
+                        //     <Route path="/pos/table" render={() => <GoodsTable content={content} dispatch={dispatch} />}  />
+                        // </Switch>
                         }
                     </div>
                 </Content>

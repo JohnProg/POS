@@ -18,24 +18,33 @@ export const getNavData = app => [
             {
                 name: 'Point of Sale',
                 icon: 'shopping-cart',
-                path: 'pos',
-                component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/Choose')),
-                exact: false,
-                children: [
-                    {
-                        path: 'pos/list',
-                        component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/GoodsList')),
-                    },
-                    {
-                        path: 'pos/table',
-                        component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/GoodsTable')),
-                    }
-                ]
+                path: 'pos/list',
+                // component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/Choose')),
+                component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/GoodsList')),
+            },
+            {
+                path: 'pos/table',
+                component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/GoodsTable')),
             },
             {
                 path: 'pos/payment',
                 component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/Payment')),
-            },
+
+            }
+                // children: [
+                //     {
+                //         path: 'list',
+                //         component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/GoodsList')),
+                //     },
+                //     {
+                //         path: 'table',
+                //         component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/GoodsTable')),
+                //     },
+                //     {
+                //         path: 'payment',
+                //         component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/Payment')),
+                //     }
+                // ]
         ],
     },
     {
