@@ -16,6 +16,9 @@ const proxy = {
     'GET /api/getCommodity': mockjs.mock({
     'list|100': [{ Name: Random.cname(), 'UnitPrice|1-1000': 150, 'Image': Random.image('100x100'), 'Key|+1': 0 }]
     }),
+    'GET /api/getCustomer': mockjs.mock({
+    'list|100': [{ Name: Random.cname(), Address: Random.city(), Phone: Random.id(), 'Key|+1': 0 }]
+    }),
   // 支持值为 Object 和 Array
   'GET /api/currentUser': {
     $desc: "获取当前用户接口",

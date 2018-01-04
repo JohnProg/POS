@@ -4,6 +4,9 @@ import request from '../utils/request';
 export async function fetchCommodityList() {
     return request('api/getCommodity')
 }
+export async function fetchCustomerList() {
+    return request('api/getCustomer')
+}
 
 export async function queryProjectNotice() {
   return request('/api/project/notice');

@@ -1,5 +1,5 @@
 import moment from 'moment'
-import { fetchCommodityList } from '../services/api'
+import { fetchCommodityList, fetchCustomerList } from '../services/api'
 
 function getCurrentOrder(state) {
     return state.orders.filter(item => item.key === state.activeKey)[0]
@@ -17,6 +17,10 @@ export default {
     },
 
     effects: {
+        *searchCustomer(_, { put, call }) {
+            const { list } = yield call(fetchCustomerList)
+            yield console.log(list)
+        },
         *changePaymentDataAndCheck(action, { put, select }) {
             const paymentData = action.payload
             yield put({type: 'changePaymentData', payload: paymentData})

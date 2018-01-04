@@ -20,6 +20,21 @@ const fieldLabels = {
   taxNumber: '税号',
 };
 
+const columns = [
+    {
+        title: '客户名称',
+        dataIndex: 'Name',
+    },
+    {
+        title: '地址',
+        dataIndex: 'address',
+    },
+    {
+        title: '电话',
+        dataIndex: 'Phone',
+    }
+]
+
 const formItemLayout = {
     labelCol: {span: 6},
     wrapperCol: {span: 16},
@@ -33,6 +48,11 @@ class Payment extends PureComponent {
             isConfirmEnable: false,
         }
     }
+    componentDidMount() {
+        this.props.dispatch({
+            type: 'commodity/searchCustomer',
+        })
+    }
     handlePrevClick = () => {
         this.props.dispatch({type: 'commodity/changePhase', payload: {activeTabKey: this.props.activeTabKey, phase: 'choose'}})
     }
@@ -41,16 +61,30 @@ class Payment extends PureComponent {
             isConfirmEnable: bool,
         })
     }
-    handleFormSubmit = () => {
-        console.log(111)
+    handleFormSubmit = (e) => {
+    e.preventDefault();
+    this.props.form.validateFieldsAndScroll((err, values) => {
+      if (!err) {
+          console.log(values)
+      }
+    });
+    }
+    handleAddCustomerFormSubmit = (e) => {
+    e.preventDefault();
+    this.props.form.validateFieldsAndScroll((err, values) => {
+      if (!err) {
+          console.log(values)
+      }
+    });
     }
     render() {
         const { dispatch, form } = this.props
         const { totalPrice } = this.props.order
-        const { getFieldDecorator, validateFieldsAndScroll, getFieldsError } = form;
+        const { getFieldDecorator } = form;
         const addCustomerForm = (
             <Form
-                onSubmit={this.handleSubmitCustomer}
+                onSubmit={this.handleAddCustomerFormSubmit}
+                className={styles.addCustomerForm}
             >
                 <Row gutter={16}>
                     <Col lg={12} sm={24}>
@@ -60,6 +94,17 @@ class Payment extends PureComponent {
                             })(
                                 <Input placeholder="名称" />
                             )}
+                        </FormItem>
+                    </Col>
+                    <Col lg={12} sm={24} pull={1} className={styles.submitFormItem}>
+                        <FormItem>
+                            <Button shape="circle">
+                                <Icon type="minus-circle" />
+                            </Button>
+                            <Divider type="vertical" />
+                            <Button htmlType="submit" shape="circle">
+                                <Icon type="save" />
+                            </Button>
                         </FormItem>
                     </Col>
                 </Row>
@@ -81,8 +126,8 @@ class Payment extends PureComponent {
                 </Row>
                 <Row gutter={16}>
                     <Col lg={12} sm={24}>
-                        <FormItem label={fieldLabels.country} { ...formItemLayout }>
-                            {getFieldDecorator('country')(
+                        <FormItem label={fieldLabels.city} { ...formItemLayout }>
+                            {getFieldDecorator('city')(
                                 <Input placeholder="城市" />
                             )}
                         </FormItem>
@@ -93,6 +138,40 @@ class Payment extends PureComponent {
                                 rules: [{ required: true, message: '请输入电话' }],
                             })(
                                 <Input placeholder="电话" />
+                            )}
+                        </FormItem>
+                    </Col>
+                </Row>
+                <Row gutter={16}>
+                    <Col lg={12} sm={24}>
+                        <FormItem label={fieldLabels.postcode} { ...formItemLayout }>
+                            {getFieldDecorator('postcode')(
+                                <Input placeholder="邮政编码" />
+                            )}
+                        </FormItem>
+                    </Col>
+                    <Col lg={12} sm={24}>
+                        <FormItem label={fieldLabels.barcode} { ...formItemLayout }>
+                            {getFieldDecorator('barcode', {
+                            })(
+                                <Input placeholder="条码" />
+                            )}
+                        </FormItem>
+                    </Col>
+                </Row>
+                <Row gutter={16}>
+                    <Col lg={12} sm={24}>
+                        <FormItem label={fieldLabels.country} { ...formItemLayout }>
+                            {getFieldDecorator('country')(
+                                <Input placeholder="国家" />
+                            )}
+                        </FormItem>
+                    </Col>
+                    <Col lg={12} sm={24}>
+                        <FormItem label={fieldLabels.taxNumber} { ...formItemLayout }>
+                            {getFieldDecorator('taxNumber', {
+                            })(
+                                <Input placeholder="税号" />
                             )}
                         </FormItem>
                     </Col>
@@ -134,6 +213,11 @@ class Payment extends PureComponent {
                     }
                 </div>
                 <div className={styles.customerTable}>
+                            <Table
+                                bordered
+                                columns={columns}
+                                rowKey={record => record.Key}
+                            />
                 </div>
             </div>
         )
