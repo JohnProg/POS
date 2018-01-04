@@ -30,6 +30,10 @@ export const getNavData = app => [
                 path: 'pos/payment',
                 component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/Payment')),
 
+            },
+            {
+                path: 'pos/customer',
+                component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/Customer')),
             }
                 // children: [
                 //     {

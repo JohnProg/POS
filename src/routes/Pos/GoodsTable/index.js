@@ -233,6 +233,10 @@ class GoodsTable extends PureComponent {
             border: 0,
             overflow: 'hidden',
         }
+        let tagSelectWrapper = cx({
+            [styles.tagSelectShow]: this.state.display,
+            [styles.tagSelectHide]: !this.state.display,
+        })
         return (
             <Layout>
                 <Sider
@@ -267,7 +271,7 @@ class GoodsTable extends PureComponent {
                             onClick={() => {dispatch(routerRedux.push('/pos/table'))}}
                         />
                         <a style={{ marginLeft: 8 }} onClick={this.toggleCollapse}>
-                            配置表格 <Icon type="down" />
+                            配置表格 <Icon type={this.state.display ? "up" : "down"} />
                         </a>
                         <div className={styles.right}>
                             <HeaderSearch
@@ -283,14 +287,7 @@ class GoodsTable extends PureComponent {
                             />
                         </div>
                     </div>
-                    <div>
-                        111
-                    </div>
-                    <div className={styles.tabHeader}></div>
-                    <div className={styles.commodityListWrapper}>
-                        <div>
-                            <Collapse bordered={false}>
-                                <Panel  header="表格配置" style={customPanelStyle}>
+                    <div className={tagSelectWrapper}>
                                     <TagSelect onChange={this.handleTagChange} defaultValue={defaultValue}>
                                         {
                                             this.state.tagList.map(item => (
@@ -298,8 +295,9 @@ class GoodsTable extends PureComponent {
                                             ))
                                         }
                                     </TagSelect>
-                                </Panel>
-                            </Collapse>
+                    </div>
+                    <div className={styles.tabHeader}></div>
+                    <div className={styles.commodityListWrapper}>
                             <Table
                                 bordered
                                 dataSource={content}
@@ -307,7 +305,6 @@ class GoodsTable extends PureComponent {
                                 components={this.components}
                                 rowKey={record => record.Key}
                             />
-                        </div>
                     </div>
             </Content>
         </Layout>
