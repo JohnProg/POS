@@ -1,13 +1,6 @@
 import isNumber from '../../isNumber'
 import { routerRedux } from 'dva/router';
 
-function paymentHandler(activeTabKey, dispatch) {
-    const phase = 'payment'
-    // dispatch({type: 'commodity/changePhase', payload: { activeTabKey, phase } })
-        dispatch(routerRedux.push('/pos/payment'));
-
-}
-
 function generateNewSelectedList(activeSelectedKey, selectedList, cache, number, type) {
     return selectedList.map(item => {
         if (item.Key === activeSelectedKey) {
@@ -181,6 +174,10 @@ export default function calculate(commodity, dispatch, buttonName) {
     const activeTabKey = commodity.activeKey
     const currentOrder = commodity.orders.filter(item => (item.key === activeTabKey))[0]
     const { selectedList } = currentOrder
+    if (buttonName === 'customer') { 
+        dispatch(routerRedux.push('/pos/customer'));
+        return
+    }
     if (!selectedList || (Array.isArray(selectedList) && selectedList.length === 0))  { return }
     const activeSelectedKey = currentOrder.activeKey
     const selectedItem = currentOrder.selectedList.filter(item => (item.Key === activeSelectedKey))[0]
@@ -189,10 +186,6 @@ export default function calculate(commodity, dispatch, buttonName) {
         if (selectedItem.CalculateType === buttonName) { return }
         dispatch({ type: 'commodity/changeCalculateType', payload: buttonName })
         return 
-    }
-    if (buttonName === 'customer') { 
-        console.log('customer')
-        return
     }
     if (buttonName === 'warehouse') {
         console.log('warehouse')
@@ -203,7 +196,8 @@ export default function calculate(commodity, dispatch, buttonName) {
         return
     }
     if (buttonName === 'payment') {
-        paymentHandler(activeTabKey, dispatch)
+        dispatch(routerRedux.push('/pos/payment'));
+        return
     }
     if (calculateType === 'count') {
         countHandler(dispatch, buttonName, activeTabKey, selectedList, selectedItem, activeSelectedKey)
