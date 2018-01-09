@@ -153,14 +153,14 @@ class BasicLayout extends React.PureComponent {
                 {icon}<span>{item.name}</span>
               </a>
             ) : (
-              <Link
-                to={itemPath}
-                target={item.target}
-                replace={itemPath === this.props.location.pathname}
-              >
-                {icon}<span>{item.name}</span>
-              </Link>
-            )
+                <Link
+                  to={itemPath}
+                  target={item.target}
+                  replace={itemPath === this.props.location.pathname}
+                >
+                  {icon}<span>{item.name}</span>
+                </Link>
+              )
           }
         </Menu.Item>
       );
@@ -169,10 +169,10 @@ class BasicLayout extends React.PureComponent {
   getPageTitle() {
     const { location, getRouteData } = this.props;
     const { pathname } = location;
-    let title = 'Ant Design Pro';
+    let title = 'Orssica';
     getRouteData('BasicLayout').forEach((item) => {
       if (item.path === pathname) {
-        title = `${item.name} - Ant Design Pro`;
+        title = `${item.name} - Orssica`;
       }
     });
     return title;
@@ -262,12 +262,12 @@ class BasicLayout extends React.PureComponent {
     const layout = (
       <Layout>
         <Sider
-            trigger={null}
-            collapsible
-            collapsed={collapsed}
-            onCollapse={this.onCollapse}
-            className={styles.sider}
-            width={256}
+          trigger={null}
+          collapsible
+          collapsed={collapsed}
+          onCollapse={this.onCollapse}
+          className={styles.sider}
+          width={256}
         >
           <div className={styles.logo}>
             <Link to="/">
@@ -287,7 +287,7 @@ class BasicLayout extends React.PureComponent {
           </Menu>
         </Sider>
         <Layout
-            className={styles.rightContent}
+          className={styles.rightContent}
         >
           <Header className={styles.header}>
             <Icon
@@ -347,7 +347,7 @@ class BasicLayout extends React.PureComponent {
               ) : <Spin size="small" style={{ marginLeft: 8 }} />}
             </div>
           </Header>
-          <Content style={{height: '100%', margin: '24px 24px 0px' }}>
+          <Content style={{ height: '100%', margin: '24px 24px 0px' }}>
             <div style={{ minHeight: 'calc(100vh - 260px)' }}>
               <Switch>
                 {
@@ -367,21 +367,21 @@ class BasicLayout extends React.PureComponent {
             </div>
             <GlobalFooter
               links={[{
-                title: 'Pro 首页',
-                href: 'http://pro.ant.design',
+                title: 'PMS',
+                href: '',
                 blankTarget: true,
               }, {
-                title: 'GitHub',
-                href: 'https://github.com/ant-design/ant-design-pro',
+                title: 'xxx',
+                href: '',
                 blankTarget: true,
               }, {
-                title: 'Ant Design',
-                href: 'http://ant.design',
+                title: 'xxx',
+                href: '',
                 blankTarget: true,
               }]}
               copyright={
                 <div>
-                  Copyright <Icon type="copyright" /> 2017 蚂蚁金服体验技术部出品
+                  Copyright <Icon type="copyright" /> 2017 Orssica
                 </div>
               }
             />

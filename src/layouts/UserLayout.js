@@ -17,7 +17,7 @@ const links = [{
   href: '',
 }];
 
-const copyright = <div>Copyright <Icon type="copyright" /> 2017 蚂蚁金服体验技术部出品</div>;
+const copyright = <div>Copyright <Icon type="copyright" /> 2017 Ocrrsia</div>;
 
 class UserLayout extends React.PureComponent {
   static childContextTypes = {
@@ -30,10 +30,10 @@ class UserLayout extends React.PureComponent {
   getPageTitle() {
     const { getRouteData, location } = this.props;
     const { pathname } = location;
-    let title = 'Ant Design Pro';
+    let title = 'POS';
     getRouteData('UserLayout').forEach((item) => {
       if (item.path === pathname) {
-        title = `${item.name} - Ant Design Pro`;
+        title = `${item.name} - POS`;
       }
     });
     return title;
@@ -47,11 +47,13 @@ class UserLayout extends React.PureComponent {
           <div className={styles.top}>
             <div className={styles.header}>
               <Link to="/">
-                <img alt="" className={styles.logo} src="https://gw.alipayobjects.com/zos/rmsportal/NGCCBOENpgTXpBWUIPnI.svg" />
-                <span className={styles.title}>Ant Design</span>
+                {
+                  // <img alt="" className={styles.logo} src="https://gw.alipayobjects.com/zos/rmsportal/NGCCBOENpgTXpBWUIPnI.svg" />
+                }
+                <span className={styles.title}>POS</span>
               </Link>
             </div>
-            <div className={styles.desc}>Ant Design 是西湖区最具影响力的 Web 设计规范</div>
+            <div className={styles.desc}>Orssica Pos</div>
           </div>
           {
             getRouteData('UserLayout').map(item =>
