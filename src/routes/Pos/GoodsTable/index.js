@@ -13,6 +13,7 @@ import SelectedGoods from '../../../components/List/SelectedGoods/'
 import HeaderSearch from '../../../components/HeaderSearch';
 import styles from './index.less'
 
+
 const { Panel } = Collapse
 const { Header, Sider, Content } = Layout;
 let cx = classNames.bind(styles)

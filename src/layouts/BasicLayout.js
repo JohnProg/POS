@@ -375,7 +375,7 @@ class BasicLayout extends React.PureComponent {
                 href: '',
                 blankTarget: true,
               }, {
-                title: 'xxx',
+                title: 'yyy',
                 href: '',
                 blankTarget: true,
               }]}
