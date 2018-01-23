@@ -19,7 +19,6 @@ export default {
   effects: {
     *searchCustomer(_, { call }) {
       const { list } = yield call(fetchCustomerList);
-      yield console.log(list);
     },
     *changePaymentDataAndCheck(action, { put }) {
       const paymentData = action.payload;
@@ -85,7 +84,7 @@ export default {
     *checkPaymentData(action, { put, select }) {
       const commodity = yield select(state => state.commodity);
       const currentOrder = getCurrentOrder(commodity);
-      const { paymentData,  activePaymentDataIndex, totalPrice } = currentOrder;
+      const { paymentData, activePaymentDataIndex, totalPrice } = currentOrder;
       const currentItem = paymentData.filter((item, index) => index === activePaymentDataIndex)[0];
       const { cash } = currentItem;
       function generateDemand(prevDemand, prevCash) {
@@ -225,7 +224,8 @@ export default {
       const { count, tabType, currentTime } = action.payload;
       const currentActiveKey = state.activeKey;
       const goodsOrders = state.orders.filter(item => typeof item.title !== 'string');
-      const orders = [...goodsOrders,
+      const orders = [
+        ...goodsOrders,
         {
           title: count,
           key: `orders-${count}`,

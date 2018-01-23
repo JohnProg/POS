@@ -299,7 +299,7 @@ class GoodsTable extends PureComponent {
           </div>
           <div className={styles.tabHeader}></div>
           <div className={styles.commodityListWrapper}>
-          <div>可以拖拽表头进行排序</div>
+            <div>可以拖拽表头进行排序</div>
             <Table
               bordered
               dataSource={content}

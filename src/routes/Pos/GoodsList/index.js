@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { Card, Button, Layout, Icon } from 'antd'
+import { Card, Button, Layout, Icon, Radio, } from 'antd'
 import CardItem from './CardItem'
 import ChooseCalculator from '../../../components/Calculator/Choose/'
 import SelectedGoods from '../../../components/List/SelectedGoods/'
@@ -8,6 +8,10 @@ import styles from './index.less'
 import classNames from 'classnames'
 import { connect } from 'dva'
 import { routerRedux } from 'dva/router';
+
+const RadioButton = Radio.Button;
+const RadioGroup = Radio.Group;
+
 
 const { Header, Sider, Content } = Layout;
 let cx = classNames.bind(styles)
@@ -61,6 +65,12 @@ export default class GoodsList extends PureComponent {
               type="profile"
               onClick={() => { dispatch(routerRedux.push('/pos/table')) }}
             />
+
+            <RadioGroup defaultValue="local">
+              <RadioButton value="local">本地</RadioButton>
+              <RadioButton value="express">邮寄</RadioButton>
+            </RadioGroup>
+
             <div className={styles.right}>
               <HeaderSearch
                 className={`${styles.action} ${styles.search}`}
