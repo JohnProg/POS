@@ -165,10 +165,11 @@ export default {
       yield put({ type: 'changeSelectedItem', payload: { activeTabKey, newSelectedList } });
       const { orders, activeKey } = yield select(state => state.commodity);
       const currentOrder = orders.filter(item => (item.key === activeTabKey))[0];
+      const { saleType } = currentOrder
       const selectedList = currentOrder.selectedList;
       let totalPrice = 0;
       selectedList.forEach((item) => {
-        const unitPrice = (item.NewUnitPrice || item.NewUnitPrice === 0) ? item.NewUnitPrice : item.UnitPrice;
+        const unitPrice = (item.NewUnitPrice || item.NewUnitPrice === 0) ? item.NewUnitPrice : item.UnitPrice['A'][saleType];
         const count = item.Count;
         const discount = item.Discount;
         const price = unitPrice * count * (discount || 100) / 100;
@@ -208,6 +209,15 @@ export default {
       }
       yield put({ type: 'changeActiveTabKey', payload: activeKey });
     },
+    *clickChangeSaleTypeButton(action, { put, select }) {
+      const saleType = action.payload
+      const { orders, activeKey } = yield select(state => state.commodity);
+      const activeTabKey = activeKey;
+      const currentOrder = orders.filter(item => (item.key === activeKey))[0];
+      const { selectedList } = currentOrder;
+      yield put({ type: 'changeSaleType', payload: saleType })
+      yield put({ type: 'changeSelectedList', payload: { activeTabKey, newSelectedList: selectedList } })
+    }
   },
 
   reducers: {
@@ -236,6 +246,7 @@ export default {
           activePaymentDataIndex: null,
           type: tabType,
           currentTime,
+          saleType: 'Local',
         },
       ];
       const activeKey = `orders-${count}`;
@@ -352,6 +363,17 @@ export default {
       const newOrders = state.orders.map((item) => {
         if (item.key && item.key === activeTabKey) {
           return { ...item, phase };
+        }
+        return item;
+      });
+      return { ...state, orders: newOrders };
+    },
+    changeSaleType(state, action) {
+      const saleType = action.payload;
+      const { activeKey } = state;
+      const newOrders = state.orders.map((item) => {
+        if (item.key === activeKey) {
+          return { ...item, saleType };
         }
         return item;
       });

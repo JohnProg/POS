@@ -1,37 +1,37 @@
 import React, { PureComponent } from 'react';
-import { Card, Button, Layout, Icon, Radio, } from 'antd'
-import CardItem from './CardItem'
-import ChooseCalculator from '../../../components/Calculator/Choose/'
-import SelectedGoods from '../../../components/List/SelectedGoods/'
+import { Card, Button, Layout, Icon, Radio } from 'antd';
+import CardItem from './CardItem';
+import ChooseCalculator from '../../../components/Calculator/Choose/';
+import SelectedGoods from '../../../components/List/SelectedGoods/';
 import HeaderSearch from '../../../components/HeaderSearch';
-import styles from './index.less'
-import classNames from 'classnames'
-import { connect } from 'dva'
+import styles from './index.less';
+import classNames from 'classnames';
+import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
 
 
-const { Header, Sider, Content } = Layout;
-let cx = classNames.bind(styles)
+const { Sider, Content } = Layout;
+const cx = classNames.bind(styles);
 
 @connect(state => ({ commodity: state.commodity }))
 
 export default class GoodsList extends PureComponent {
   render() {
-    const { commodity, dispatch } = this.props
-    const view = this.props.location && this.props.location.pathname.replace('/pos/', '')
-    const currentOrder = commodity.orders.filter(item => (item.key === commodity.activeKey))[0]
-    const { content, display } = currentOrder
-    let displayTable = cx({
+    const { commodity, dispatch } = this.props;
+    const view = this.props.location && this.props.location.pathname.replace('/pos/', '');
+    const currentOrder = commodity.orders.filter(item => (item.key === commodity.activeKey))[0];
+    const { content, display, saleType } = currentOrder;
+    const displayTable = cx({
       [styles.trigger]: true,
-      [styles.activeTrigger]: view === 'table'
-    })
-    let displayCardList = cx({
+      [styles.activeTrigger]: view === 'table',
+    });
+    const displayCardList = cx({
       [styles.trigger]: true,
-      [styles.activeTrigger]: view === 'list'
-    })
+      [styles.activeTrigger]: view === 'list',
+    });
     return (
       <Layout>
         <Sider
@@ -41,7 +41,7 @@ export default class GoodsList extends PureComponent {
           <Content
             className={styles.leftContent}
           >
-            <SelectedGoods />
+            <SelectedGoods saleType={saleType} />
           </Content>
           <div
             className={styles.calculator}
@@ -58,17 +58,20 @@ export default class GoodsList extends PureComponent {
             <Icon
               className={displayCardList}
               type="table"
-              onClick={() => { dispatch(routerRedux.push('/pos/list')) }}
+              onClick={() => { dispatch(routerRedux.push('/pos/list')); }}
             />
             <Icon
               className={displayTable}
               type="profile"
-              onClick={() => { dispatch(routerRedux.push('/pos/table')) }}
+              onClick={() => { dispatch(routerRedux.push('/pos/table')); }}
             />
 
-            <RadioGroup defaultValue="local">
-              <RadioButton value="local">本地</RadioButton>
-              <RadioButton value="express">邮寄</RadioButton>
+            <RadioGroup
+              defaultValue="Local"
+              onChange={e => dispatch({ type: 'commodity/clickChangeSaleTypeButton', payload: e.target.value })}
+            >
+              <RadioButton value="Local">本地</RadioButton>
+              <RadioButton value="Express">邮寄</RadioButton>
             </RadioGroup>
 
             <div className={styles.right}>
@@ -85,16 +88,16 @@ export default class GoodsList extends PureComponent {
               />
             </div>
           </div>
-          <div className={styles.tabHeader}></div>
+          <div className={styles.tabHeader} />
           <div className={styles.commodityListWrapper}>
             <div>
               {
-                Array.isArray(content) && content.map(item => <CardItem item={item} key={item.Key} dispatch={dispatch} />)
+                Array.isArray(content) && content.map(item => <CardItem item={item} key={item.Key} dispatch={dispatch} saleType={saleType} />)
               }
             </div>
           </div>
         </Content>
       </Layout>
-    )
+    );
   }
 }

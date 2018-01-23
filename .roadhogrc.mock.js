@@ -18,8 +18,8 @@ const proxy = {
       Name: Random.cname(),
       UnitPrice: {
         A: {
-          '0|300-1000': 1,
-          '1|200-300': 1,
+          'Local|300-1000': 1,
+          'Express|200-300': 1,
         }
       },
       'Image': Random.image('100x100'),

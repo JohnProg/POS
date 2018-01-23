@@ -11,12 +11,12 @@ import Debounce from 'lodash-decorators/debounce';
 import NoticeIcon from '../components/NoticeIcon';
 import NotFound from '../routes/Exception/404';
 import styles from './PosLayout.less';
-import ChooseCalculator from '../components/Calculator/Choose/'
-import SelectedGoods from '../components/List/SelectedGoods/'
-import { POS_TAB_TYPE } from '../constant'
-import classnames from 'classnames'
+import ChooseCalculator from '../components/Calculator/Choose/';
+import SelectedGoods from '../components/List/SelectedGoods/';
+import { POS_TAB_TYPE } from '../constant';
+import classnames from 'classnames';
 
-let cls = classnames.bind(styles)
+const cls = classnames.bind(styles);
 
 const { Header, Sider, Content, Footer } = Layout;
 const { SubMenu } = Menu;
@@ -60,9 +60,9 @@ class PosLayout extends PureComponent {
     this.props.dispatch({
       type: 'user/fetchCurrent',
     });
-    this.innerHeight = window.innerHeight
+    this.innerHeight = window.innerHeight;
     if (this.props.commodity.orders.length === 0) {
-      this.props.dispatch({ type: 'commodity/clickAddButton', payload: POS_TAB_TYPE.SALE })
+      this.props.dispatch({ type: 'commodity/clickAddButton', payload: POS_TAB_TYPE.SALE });
     }
   }
   getPageTitle() {
@@ -120,40 +120,40 @@ class PosLayout extends PureComponent {
   }
   onChange = (activeKey) => {
     if (activeKey === '+') {
-      this.props.dispatch({ type: 'commodity/clickAddButton', payload: POS_TAB_TYPE.SALE })
-      return
+      this.props.dispatch({ type: 'commodity/clickAddButton', payload: POS_TAB_TYPE.SALE });
+      return;
     }
     if (activeKey === '-') {
-      return
+      return;
     }
-    this.props.dispatch({ type: 'commodity/changeActiveTabKey', payload: activeKey })
+    this.props.dispatch({ type: 'commodity/changeActiveTabKey', payload: activeKey });
   }
   remove = (currentIndex) => {
-    this.props.dispatch({ type: 'commodity/clickRemoveButton', payload: currentIndex })
+    this.props.dispatch({ type: 'commodity/clickRemoveButton', payload: currentIndex });
   }
   render() {
     const { currentUser, collapsed, fetchingNotices, getRouteData } = this.props;
-    const { orders, activeKey } = this.props.commodity || {}
-    const currentIndex = orders.findIndex(item => item.key === activeKey)
+    const { orders, activeKey } = this.props.commodity || {};
+    const currentIndex = orders.findIndex(item => item.key === activeKey);
     const createTabTitle = (title, type, key, currentTime) => {
       const tabsBarContentCls = cls({
         [styles.tabsBarContent]: true,
         [styles.tabsBarContentAllocate]: type === POS_TAB_TYPE.ALLOCATEANDTRANSFER,
-      })
-      const activeTabKey = activeKey
+      });
+      const activeTabKey = activeKey;
       if (title === '+') {
         return (
           <div className={styles.operationButton}>
-            <Icon type='plus' />
+            <Icon type="plus" />
           </div>
-        )
+        );
       }
       if (title === '-') {
         return (
           <div className={styles.operationButton}>
             <Icon type="minus" onClick={this.remove.bind(this, currentIndex)} />
           </div>
-        )
+        );
       }
       if (typeof title === 'number') {
         const tabsBarElement = (
@@ -163,10 +163,10 @@ class PosLayout extends PureComponent {
               activeTabKey === key && <span>{currentTime}</span>
             }
           </div>
-        )
-        return tabsBarElement
+        );
+        return tabsBarElement;
       }
-    }
+    };
     const menu = (
       <Menu className={styles.menu} selectedKeys={[]} onClick={this.onMenuClick}>
         <Menu.Item disabled><Icon type="user" />个人中心</Menu.Item>
@@ -182,7 +182,7 @@ class PosLayout extends PureComponent {
           <h1>POS</h1>
         </Link>
       </div>
-    )
+    );
 
 
     const layout = (
