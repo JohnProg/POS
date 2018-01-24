@@ -3,6 +3,7 @@ import { connect } from 'dva';
 import { Row, Col, Card, Form, Input, Select, Icon, Button, Dropdown, Menu, InputNumber, DatePicker, Modal, message, Table, Radio } from 'antd';
 import styles from './index.less';
 import TableForm from './TableForm'
+  ;
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
 
@@ -14,19 +15,18 @@ const RadioGroup = Radio.Group;
 
 export default class Express extends PureComponent {
   render() {
-
-    const { dispatch } = this.props;
+    const { dispatch, order } = this.props;
     const { goodsPrice } = this.props.order;
     return (
       <div className={styles.expressWrapper}>
         <Row>
-            <RadioGroup
-              defaultValue="Local"
-              onChange={e => dispatch({ type: 'commodity/clickChangeSaleTypeButton', payload: e.target.value })}
-            >
-              <RadioButton value="Local">本地</RadioButton>
-              <RadioButton value="Express">邮寄</RadioButton>
-            </RadioGroup>
+          <RadioGroup
+            defaultValue="Local"
+            onChange={e => dispatch({ type: 'commodity/clickChangeSaleTypeButton', payload: e.target.value })}
+          >
+            <RadioButton value="Local">本地</RadioButton>
+            <RadioButton value="Express">邮寄</RadioButton>
+          </RadioGroup>
 
           {/* <Row
             type="flex"
@@ -48,7 +48,10 @@ export default class Express extends PureComponent {
             </Col>
           </Row> */}
         </Row>
-        <TableForm />
+        <TableForm
+        dispatch={dispatch}
+        dataSource={order.expressData || []}
+         />
       </div>
     );
   }

@@ -1,20 +1,20 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import Mbutton from './Mbutton'
+import Mbutton from './Mbutton';
 import { Row, Col, Table, Button, Icon } from 'antd';
 import styles from './LocalSale.less';
 import PaymentCalculator from '../../../components/Calculator/Payment/';
 
 const paymentMethods = [
-  { name: "现金", value: "Cash", },
-  { name: "EFTPOS", value: "EFTPOS", },
-  { name: "银联", value: "UnionPay", },
-  { name: "转账", value: "Transfer", },
-  { name: "信用卡", value: "CreditCard", },
-  { name: "LatiPay", value: "LatiPay", },
-  { name: "支付宝", value: "AliPay", },
-  { name: "微信", value: "WechatPay", },
-]
+  { name: '现金', value: 'Cash' },
+  { name: 'EFTPOS', value: 'EFTPOS' },
+  { name: '银联', value: 'UnionPay' },
+  { name: '转账', value: 'Transfer' },
+  { name: '信用卡', value: 'CreditCard' },
+  { name: 'LatiPay', value: 'LatiPay' },
+  { name: '支付宝', value: 'AliPay' },
+  { name: '微信', value: 'WechatPay' },
+];
 
 class LocalSale extends PureComponent {
   componentDidMount() {
@@ -28,7 +28,7 @@ class LocalSale extends PureComponent {
     this.props.dispatch({ type: 'commodity/clickCashButton' });
   }
   clickHandler = (paymentMethod) => {
-    this.props.dispatch({ type: 'commodity/clickPaymentMethodButton', payload: paymentMethod, });
+    this.props.dispatch({ type: 'commodity/clickPaymentMethodButton', payload: paymentMethod });
   }
   handleRowClick = (record, index) => {
     return {
@@ -77,14 +77,14 @@ class LocalSale extends PureComponent {
           className={styles.leftContent}
         >
           {
-            paymentMethods.map(item => <Mbutton
+            paymentMethods.map(item => (<Mbutton
               ghost
               type="primary"
               name={item.name}
               calue={item.value}
               clickHandler={this.clickHandler}
               key={item.value}
-            />)
+            />))
           }
 
         </Col>
@@ -119,7 +119,7 @@ class LocalSale extends PureComponent {
                   <div className={styles.options}>
                     <Button>
                       客户
-                                        </Button>
+                    </Button>
                   </div>
                 </Col>
               </Row>

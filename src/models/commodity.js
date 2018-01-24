@@ -52,12 +52,8 @@ export default {
       yield put({ type: 'changeCommodityContent', payload: newContent });
       yield put({ type: 'addToSelectedList', payload: key });
     },
-    *clickAddExpressButton(action, { put, select }) {
-      const commodity = yield select(state => state.commodity);
-      const currentOrder = getCurrentOrder(commodity);
-    },
     *clickPaymentMethodButton(action, { put, select }) {
-      const paymentMethod = action.payload
+      const paymentMethod = action.payload;
       const commodity = yield select(state => state.commodity);
       const currentOrder = getCurrentOrder(commodity);
       const { paymentData, paymentDataIndex } = currentOrder;
@@ -170,17 +166,18 @@ export default {
       yield put({ type: 'changeSelectedItem', payload: { activeTabKey, newSelectedList } });
       const { orders, activeKey } = yield select(state => state.commodity);
       const currentOrder = orders.filter(item => (item.key === activeTabKey))[0];
-      const { saleType } = currentOrder
+      const { saleType } = currentOrder;
       const selectedList = currentOrder.selectedList;
       let goodsPrice = 0;
       selectedList.forEach((item) => {
-        const unitPrice = (item.NewUnitPrice || item.NewUnitPrice === 0) ? item.NewUnitPrice : item.UnitPrice['A'][saleType];
+        const unitPrice = (item.NewUnitPrice || item.NewUnitPrice === 0) ? item.NewUnitPrice : item.UnitPrice.A[saleType];
         const count = item.Count;
         const discount = item.Discount;
         const price = unitPrice * count * (discount || 100) / 100;
         goodsPrice += price;
       });
       yield put({ type: 'changeGoodsPrice', payload: goodsPrice });
+      yield put({ type: 'sumTotalPrice' })
     },
     *clickAddButton(action, { put, call, select }) {
       const tabType = action.payload;
@@ -215,14 +212,50 @@ export default {
       yield put({ type: 'changeActiveTabKey', payload: activeKey });
     },
     *clickChangeSaleTypeButton(action, { put, select }) {
-      const saleType = action.payload
+      const saleType = action.payload;
       const { orders, activeKey } = yield select(state => state.commodity);
       const activeTabKey = activeKey;
       const currentOrder = orders.filter(item => (item.key === activeKey))[0];
       const { selectedList } = currentOrder;
-      yield put({ type: 'changeSaleType', payload: saleType })
-      yield put({ type: 'changeSelectedList', payload: { activeTabKey, newSelectedList: selectedList } })
-    }
+      yield put({ type: 'changeSaleType', payload: saleType });
+      yield put({ type: 'changeSelectedList', payload: { activeTabKey, newSelectedList: selectedList } });
+    },
+    *clickAddBoxButton(action, { put, select }) {
+      const commodity = yield select(state => state.commodity);
+      const currentOrder = getCurrentOrder(commodity);
+      const { expressData, expressDataIndex } = currentOrder;
+      const newMember = {
+        ID: `NEW_BOX_ID_${expressDataIndex}`,
+        Name: '',
+        Weight: null,
+        WeightedWeight: 300,
+        Cost: 0,
+      };
+      const newExpressData = [...expressData, newMember];
+      yield put({ type: 'changeExpressData', payload: newExpressData });
+      yield put({ type: 'changeExpressDataIndex', payload: expressDataIndex });
+    },
+    *changeExpressDataAndSumCost(action, { put }) {
+      const expressData = action.payload;
+      yield put({ type: 'changeExpressData', payload: expressData });
+      yield put({ type: 'sumExpressCost', payload: expressData });
+    },
+    *sumExpressCost(action, { put }) {
+      const expressData = action.payload;
+      let expressCost = 0;
+      expressData.forEach((item) => {
+        item.Cost && (expressCost += item.Cost);
+      });
+      yield put({ type: 'changeExpressCost', payload: expressCost });
+      yield put({ type: 'sumTotalPrice' })
+    },
+    *sumTotalPrice(action, { put, select }) {
+      const commodity = yield select(state => state.commodity);
+      const currentOrder = getCurrentOrder(commodity);
+      const { goodsPrice, expressCost } = currentOrder;
+      const totalPrice = goodsPrice + expressCost
+      yield put({ type: 'changeTotalPrice', payload: totalPrice })
+    },
   },
 
   reducers: {
@@ -248,8 +281,12 @@ export default {
           activeKey: null,
           paymentDataIndex: 0,
           paymentData: [],
-          expressData: [],
           activePaymentDataIndex: null,
+          goodsPrice: 0,
+          expressDataIndex: 0,
+          expressData: [],
+          expressCost: 0,
+          totalPrice: 0,
           type: tabType,
           currentTime,
           saleType: 'Local',
@@ -408,12 +445,46 @@ export default {
       });
       return { ...state, orders: newOrders };
     },
+    changeExpressDataIndex(state, action) {
+      let expressDataIndex = action.payload;
+      const { activeKey } = state;
+      expressDataIndex += 1;
+      const newOrders = state.orders.map((item) => {
+        if (item.key === activeKey) {
+          return { ...item, expressDataIndex };
+        }
+        return item;
+      });
+      return { ...state, orders: newOrders };
+    },
     changeExpressData(state, action) {
       const expressData = action.payload;
       const { activeKey } = state;
       const newOrders = state.orders.map((item) => {
         if (item.key === activeKey) {
           return { ...item, expressData };
+        }
+        return item;
+      });
+      return { ...state, orders: newOrders };
+    },
+    changeExpressCost(state, action) {
+      const expressCost = action.payload;
+      const { activeKey } = state;
+      const newOrders = state.orders.map((item) => {
+        if (item.key === activeKey) {
+          return { ...item, expressCost };
+        }
+        return item;
+      });
+      return { ...state, orders: newOrders };
+    },
+    changeTotalPrice(state, action) {
+      const totalPrice = action.payload;
+      const { activeKey } = state;
+      const newOrders = state.orders.map((item) => {
+        if (item.key === activeKey) {
+          return { ...item, totalPrice };
         }
         return item;
       });

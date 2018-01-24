@@ -13,12 +13,12 @@ import Express from '../Express';
   activeTabKey: state.commodity.activeKey,
 }))
 class Payment extends PureComponent {
-    constructor(props) {
-      super(props);
-      this.state = {
-        isConfirmEnable: false,
-      };
-    }
+  constructor(props) {
+    super(props);
+    this.state = {
+      isConfirmEnable: false,
+    };
+  }
     handlePrevClick = () => {
       this.props.dispatch(routerRedux.goBack());
     }
@@ -29,7 +29,7 @@ class Payment extends PureComponent {
     }
     render() {
       const { dispatch } = this.props;
-      const { goodsPrice } = this.props.order;
+      const { goodsPrice, expressCost } = this.props.order;
       return (
         <div className={styles.paymentWrapper}>
           <Row
@@ -43,13 +43,13 @@ class Payment extends PureComponent {
             </Col>
             <Col style={{ textAlign: 'center' }}>
               <span>商品金额:{goodsPrice}</span>
-              <span>邮费金额</span>
+              <span>邮费金额:{expressCost}</span>
             </Col>
             <Col style={{ textAlign: 'right' }}>
               <Button
                 disabled={!this.state.isConfirmEnable}
               >确认
-            </Button>
+              </Button>
             </Col>
           </Row>
           <Express />
@@ -60,7 +60,7 @@ class Payment extends PureComponent {
         </div>
       );
     }
-  }
+}
 export default connect(state => ({
   order: state.commodity.orders.filter(item => item.key === state.commodity.activeKey)[0],
   activeTabKey: state.commodity.activeKey,
