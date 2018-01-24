@@ -280,7 +280,7 @@ export default class TableList extends PureComponent {
         },
         {
             title: '支付宝',
-            dataIndex: 'Alipay',
+            dataIndex: 'AliPay',
             sorter: true,
         },
         {

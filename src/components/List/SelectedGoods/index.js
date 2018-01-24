@@ -10,18 +10,18 @@ class SelectedGoods extends PureComponent {
   handleClick = (key) => {
     this.props.dispatch({ type: 'commodity/toggleSelectedGoods', payload: key });
   }
-  getTotalPrice = (selectedList, activeSelectedKey) => {
-    let totalPrice = 0;
-    selectedList.forEach((item) => {
-      const unitPrice = (item.NewUnitPrice || item.NewUnitPrice === 0) ? item.NewUnitPrice : item.UnitPrice['A'][this.props.saleType];
-      const count = item.Count;
-      const discount = item.Discount;
-      const price = unitPrice['A'][this.props.saleType] * count * (discount || 100) / 100;
-      totalPrice += price;
-    });
+  // getTotalPrice = (selectedList, activeSelectedKey) => {
+  //   let totalPrice = 0;
+  //   selectedList.forEach((item) => {
+  //     const unitPrice = (item.NewUnitPrice || item.NewUnitPrice === 0) ? item.NewUnitPrice : item.UnitPrice['A'][this.props.saleType];
+  //     const count = item.Count;
+  //     const discount = item.Discount;
+  //     const price = unitPrice['A'][this.props.saleType] * count * (discount || 100) / 100;
+  //     totalPrice += price;
+  //   });
     // this.props.dispatch({type: 'commodity/changeTotalPrice', payload: totalPrice, })
-    return totalPrice;
-  }
+    // return totalPrice;
+  // }
   generateSelectedListNode = (selectedList, activeSelectedKey) => (
     selectedList.map((item) => {
       const className = cx({
@@ -176,7 +176,7 @@ class SelectedGoods extends PureComponent {
             className={styles.totalPriceCard}
           >
             <span className={styles.totalPrice}>
-              总价： {currentOrder.totalPrice}
+              总价： {currentOrder.goodsPrice}
             </span>
           </Card>
         </div>

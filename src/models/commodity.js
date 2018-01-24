@@ -52,7 +52,12 @@ export default {
       yield put({ type: 'changeCommodityContent', payload: newContent });
       yield put({ type: 'addToSelectedList', payload: key });
     },
-    *clickCashButton(action, { put, select }) {
+    *clickAddExpressButton(action, { put, select }) {
+      const commodity = yield select(state => state.commodity);
+      const currentOrder = getCurrentOrder(commodity);
+    },
+    *clickPaymentMethodButton(action, { put, select }) {
+      const paymentMethod = action.payload
       const commodity = yield select(state => state.commodity);
       const currentOrder = getCurrentOrder(commodity);
       const { paymentData, paymentDataIndex } = currentOrder;
@@ -62,7 +67,7 @@ export default {
         demand: 0,
         cash: 0,
         giveChange: 0,
-        method: '现金',
+        method: paymentMethod.name,
         key: paymentDataIndex,
         cacheCash: null,
       }];
@@ -167,15 +172,15 @@ export default {
       const currentOrder = orders.filter(item => (item.key === activeTabKey))[0];
       const { saleType } = currentOrder
       const selectedList = currentOrder.selectedList;
-      let totalPrice = 0;
+      let goodsPrice = 0;
       selectedList.forEach((item) => {
         const unitPrice = (item.NewUnitPrice || item.NewUnitPrice === 0) ? item.NewUnitPrice : item.UnitPrice['A'][saleType];
         const count = item.Count;
         const discount = item.Discount;
         const price = unitPrice * count * (discount || 100) / 100;
-        totalPrice += price;
+        goodsPrice += price;
       });
-      yield put({ type: 'changeTotalPrice', payload: totalPrice });
+      yield put({ type: 'changeGoodsPrice', payload: goodsPrice });
     },
     *clickAddButton(action, { put, call, select }) {
       const tabType = action.payload;
@@ -243,6 +248,7 @@ export default {
           activeKey: null,
           paymentDataIndex: 0,
           paymentData: [],
+          expressData: [],
           activePaymentDataIndex: null,
           type: tabType,
           currentTime,
@@ -296,12 +302,12 @@ export default {
       });
       return { ...state, orders: newOrders };
     },
-    changeTotalPrice(state, action) {
-      const totalPrice = action.payload;
+    changeGoodsPrice(state, action) {
+      const goodsPrice = action.payload;
       const activeTabKey = state.activeKey;
       const newOrders = state.orders.map((item) => {
         if (item.key && item.key === activeTabKey) {
-          return { ...item, totalPrice };
+          return { ...item, goodsPrice };
         } return item;
       });
       return { ...state, orders: newOrders };
@@ -397,6 +403,17 @@ export default {
       const newOrders = state.orders.map((item) => {
         if (item.key === activeKey) {
           return { ...item, paymentDataIndex };
+        }
+        return item;
+      });
+      return { ...state, orders: newOrders };
+    },
+    changeExpressData(state, action) {
+      const expressData = action.payload;
+      const { activeKey } = state;
+      const newOrders = state.orders.map((item) => {
+        if (item.key === activeKey) {
+          return { ...item, expressData };
         }
         return item;
       });
