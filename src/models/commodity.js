@@ -81,13 +81,14 @@ export default {
       });
       yield put({ type: 'changePaymentData', payload: newPaymentData });
       yield put({ type: 'changeActivePaymentDataIndex', payload: activePaymentDataIndex });
+      yield put({ type: 'checkPaymentData' });
     },
     *checkPaymentData(action, { put, select }) {
       const commodity = yield select(state => state.commodity);
       const currentOrder = getCurrentOrder(commodity);
       const { paymentData, activePaymentDataIndex, totalPrice } = currentOrder;
       const currentItem = paymentData.filter((item, index) => index === activePaymentDataIndex)[0];
-      const { cash } = currentItem;
+      if (!currentItem) { return; }
       function generateDemand(prevDemand, prevCash) {
         if (prevDemand > prevCash) {
           return prevDemand - prevCash;
@@ -104,17 +105,19 @@ export default {
       }
       let prevItem;
       const newPaymentData = paymentData.map((item, index) => {
+        console.log(item, index)
         if (index === 0) {
-          prevItem = { ...item, demand: totalPrice, giveChange: generateGiveChange(item.demand, item.cash) };
+          prevItem = { ...item, demand: totalPrice, giveChange: generateGiveChange(totalPrice, item.cash) };
           return prevItem;
         } else {
-          prevItem = { ...item, demand: generateDemand(prevItem.demand, prevItem.cash), giveChange: generateGiveChange(item.demand, item.cash) };
+          let demand = generateDemand(prevItem.demand, prevItem.cash)
+          prevItem = { ...item, demand, giveChange: generateGiveChange(demand, item.cash) };
           return prevItem;
         }
       });
       yield put({ type: 'changePaymentData', payload: newPaymentData });
       yield put({ type: 'sumChangeMoney', payload: newPaymentData });
-      yield put({ type: 'sumRealMoney', payload: paymentData })
+      yield put({ type: 'sumRealMoney', payload: paymentData });
     },
     *sumChangeMoney(action, { put }) {
       const paymentData = action.payload;
@@ -122,7 +125,6 @@ export default {
       paymentData.forEach((item) => {
         changeMoney += item.giveChange;
       });
-      console.log('changeMoney', changeMoney)
       yield put({ type: 'changeChangeMoney', payload: changeMoney });
     },
     *sumRealMoney(action, { put }) {
@@ -207,7 +209,21 @@ export default {
       yield put({ type: 'initOperationButton' });
       // const { activeKey }= yield select(state => state.commodity)
 
-      const { list } = yield call(fetchCommodityList);
+      // const { list } = yield call(fetchCommodityList);
+      const list = [
+        { Name: '苹果', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 1 },
+        { Name: '梨子', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 2 },
+        { Name: '香蕉', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 3 },
+        { Name: '葡萄', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 4 },
+        { Name: '橘子', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 5 },
+        { Name: '橙子', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 6 },
+        { Name: '山寨', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 7 },
+        { Name: '樱桃', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 8 },
+        { Name: '土豆', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 9 },
+        { Name: '地瓜', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 10 },
+        { Name: '鲅鱼', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 11 },
+        { Name: '大虾', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 12 },
+      ];
       yield put({ type: 'saveCommodityList', payload: list });
     },
     *clickRemoveButton(action, { put, select }) {
@@ -274,6 +290,7 @@ export default {
       const { goodsPrice, expressCost } = currentOrder;
       const totalPrice = goodsPrice + expressCost;
       yield put({ type: 'changeTotalPrice', payload: totalPrice });
+      yield put({ type: 'checkPaymentData' });
     },
   },
 
