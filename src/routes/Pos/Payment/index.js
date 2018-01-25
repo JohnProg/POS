@@ -1,12 +1,14 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import { Button, Badge, Row, Col, Icon, Table } from 'antd';
+import { Button, Badge, Row, Col, Icon, Table, Radio, List } from 'antd';
 import styles from './index.less';
 import LocalSale from './LocalSale';
 import Express from '../Express';
 // import WareHouse from './WareHouse';
 
+const RadioButton = Radio.Button;
+const RadioGroup = Radio.Group;
 
 @connect(state => ({
   order: state.commodity.orders.filter(item => item.key === state.commodity.activeKey)[0],
@@ -19,18 +21,27 @@ class Payment extends PureComponent {
       isConfirmEnable: false,
     };
   }
-    handlePrevClick = () => {
-      this.props.dispatch(routerRedux.goBack());
-    }
-    validate = (bool) => {
-      this.setState({
-        isConfirmEnable: bool,
-      });
-    }
-    render() {
-      const { dispatch } = this.props;
-      const { goodsPrice, expressCost } = this.props.order;
-      return (
+  handlePrevClick = () => {
+    this.props.dispatch(routerRedux.goBack());
+  }
+  validate = (bool) => {
+    this.setState({
+      isConfirmEnable: bool,
+    });
+  }
+  render() {
+    const { dispatch } = this.props;
+    const { goodsPrice, expressCost, totalPrice, saleType, realMoney, changeMoney } = this.props.order;
+    const priceList = [
+      { title: '商品金额', value: goodsPrice },
+      { title: '邮费金额', value: expressCost },
+      { title: '应收金额', value: totalPrice },
+      { title: '实收金额', value: realMoney },
+      { title: '找零金额', value: changeMoney },
+    ];
+    return (
+      <div className={styles.paymentLayout}>
+        <div>left</div>
         <div className={styles.paymentWrapper}>
           <Row
             type="flex"
@@ -52,14 +63,35 @@ class Payment extends PureComponent {
               </Button>
             </Col>
           </Row>
-          <Express />
+          <RadioGroup
+            defaultValue="Local"
+            onChange={e => dispatch({ type: 'commodity/clickChangeSaleTypeButton', payload: e.target.value })}
+          >
+            <RadioButton value="Local">本地</RadioButton>
+            <RadioButton value="Express">邮寄</RadioButton>
+          </RadioGroup>
+          {
+            saleType !== 'Local' ? <Express /> : null
+          }
           <LocalSale
             totalPrice={goodsPrice}
             validate={this.validate}
           />
         </div>
-      );
-    }
+        <div />
+        <List
+          dataSource={priceList}
+          className={styles.priceList}
+          renderItem={item => (
+            <div className={styles.priceListItem}>
+                  <h2>{item.title}:</h2>
+                  <h2>{item.value}</h2>
+            </div>
+          )}
+        />
+      </div>
+    );
+  }
 }
 export default connect(state => ({
   order: state.commodity.orders.filter(item => item.key === state.commodity.activeKey)[0],

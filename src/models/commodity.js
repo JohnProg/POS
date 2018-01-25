@@ -113,6 +113,25 @@ export default {
         }
       });
       yield put({ type: 'changePaymentData', payload: newPaymentData });
+      yield put({ type: 'sumChangeMoney', payload: newPaymentData });
+      yield put({ type: 'sumRealMoney', payload: paymentData })
+    },
+    *sumChangeMoney(action, { put }) {
+      const paymentData = action.payload;
+      let changeMoney = 0;
+      paymentData.forEach((item) => {
+        changeMoney += item.giveChange;
+      });
+      console.log('changeMoney', changeMoney)
+      yield put({ type: 'changeChangeMoney', payload: changeMoney });
+    },
+    *sumRealMoney(action, { put }) {
+      const paymentData = action.payload;
+      let realMoney = 0;
+      paymentData.forEach((item) => {
+        realMoney += item.cash;
+      });
+      yield put({ type: 'changeRealMoney', payload: realMoney });
     },
     *addToSelectedList(action, { put, select }) {
       const selectedKey = action.payload;
@@ -177,7 +196,7 @@ export default {
         goodsPrice += price;
       });
       yield put({ type: 'changeGoodsPrice', payload: goodsPrice });
-      yield put({ type: 'sumTotalPrice' })
+      yield put({ type: 'sumTotalPrice' });
     },
     *clickAddButton(action, { put, call, select }) {
       const tabType = action.payload;
@@ -247,14 +266,14 @@ export default {
         item.Cost && (expressCost += item.Cost);
       });
       yield put({ type: 'changeExpressCost', payload: expressCost });
-      yield put({ type: 'sumTotalPrice' })
+      yield put({ type: 'sumTotalPrice' });
     },
     *sumTotalPrice(action, { put, select }) {
       const commodity = yield select(state => state.commodity);
       const currentOrder = getCurrentOrder(commodity);
       const { goodsPrice, expressCost } = currentOrder;
-      const totalPrice = goodsPrice + expressCost
-      yield put({ type: 'changeTotalPrice', payload: totalPrice })
+      const totalPrice = goodsPrice + expressCost;
+      yield put({ type: 'changeTotalPrice', payload: totalPrice });
     },
   },
 
@@ -287,6 +306,8 @@ export default {
           expressData: [],
           expressCost: 0,
           totalPrice: 0,
+          realMoney: 0,
+          changeMoney: 0,
           type: tabType,
           currentTime,
           saleType: 'Local',
@@ -485,6 +506,28 @@ export default {
       const newOrders = state.orders.map((item) => {
         if (item.key === activeKey) {
           return { ...item, totalPrice };
+        }
+        return item;
+      });
+      return { ...state, orders: newOrders };
+    },
+    changeChangeMoney(state, action) {
+      const changeMoney = action.payload;
+      const { activeKey } = state;
+      const newOrders = state.orders.map((item) => {
+        if (item.key === activeKey) {
+          return { ...item, changeMoney };
+        }
+        return item;
+      });
+      return { ...state, orders: newOrders };
+    },
+    changeRealMoney(state, action) {
+      const realMoney = action.payload;
+      const { activeKey } = state;
+      const newOrders = state.orders.map((item) => {
+        if (item.key === activeKey) {
+          return { ...item, realMoney };
         }
         return item;
       });
