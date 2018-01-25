@@ -1,4 +1,5 @@
 import moment from 'moment';
+import key from 'keymaster';
 import { fetchCommodityList, fetchCustomerList } from '../services/api';
 
 function getCurrentOrder(state) {
@@ -16,12 +17,19 @@ export default {
     newTabIndex: 0,
   },
 
+subscriptions: {
+    keyboardWatcher({ dispatch }) {
+      key('⌘+up, ctrl+up', () => { dispatch({type: 'searchCustomer'}) });
+    },
+  },
   effects: {
     *searchCustomer(_, { call }) {
+      console.log('ctrl+up')
       const { list } = yield call(fetchCustomerList);
     },
     *changePaymentDataAndCheck(action, { put }) {
       const paymentData = action.payload;
+      console.log(0)
       yield put({ type: 'changePaymentData', payload: paymentData });
       yield put({ type: 'checkPaymentData' });
     },
@@ -105,12 +113,11 @@ export default {
       }
       let prevItem;
       const newPaymentData = paymentData.map((item, index) => {
-        console.log(item, index)
         if (index === 0) {
           prevItem = { ...item, demand: totalPrice, giveChange: generateGiveChange(totalPrice, item.cash) };
           return prevItem;
         } else {
-          let demand = generateDemand(prevItem.demand, prevItem.cash)
+          const demand = generateDemand(prevItem.demand, prevItem.cash);
           prevItem = { ...item, demand, giveChange: generateGiveChange(demand, item.cash) };
           return prevItem;
         }
@@ -203,27 +210,27 @@ export default {
     *clickAddButton(action, { put, call, select }) {
       const tabType = action.payload;
       const commodity = yield select(state => state.commodity);
-      const count = ++commodity.newTabIndex;
+      const count = commodity.newTabIndex + 1;
       const currentTime = moment().format('HH:mm');
       yield put({ type: 'addTab', payload: { count, tabType, currentTime } });
       yield put({ type: 'initOperationButton' });
       // const { activeKey }= yield select(state => state.commodity)
 
-      // const { list } = yield call(fetchCommodityList);
-      const list = [
-        { Name: '苹果', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 1 },
-        { Name: '梨子', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 2 },
-        { Name: '香蕉', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 3 },
-        { Name: '葡萄', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 4 },
-        { Name: '橘子', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 5 },
-        { Name: '橙子', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 6 },
-        { Name: '山寨', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 7 },
-        { Name: '樱桃', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 8 },
-        { Name: '土豆', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 9 },
-        { Name: '地瓜', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 10 },
-        { Name: '鲅鱼', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 11 },
-        { Name: '大虾', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 12 },
-      ];
+      const { list } = yield call(fetchCommodityList);
+      // const list = [
+      //   { Name: '苹果', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 1 },
+      //   { Name: '梨子', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 2 },
+      //   { Name: '香蕉', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 3 },
+      //   { Name: '葡萄', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 4 },
+      //   { Name: '橘子', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 5 },
+      //   { Name: '橙子', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 6 },
+      //   { Name: '山寨', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 7 },
+      //   { Name: '樱桃', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 8 },
+      //   { Name: '土豆', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 9 },
+      //   { Name: '地瓜', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 10 },
+      //   { Name: '鲅鱼', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 11 },
+      //   { Name: '大虾', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 12 },
+      // ];
       yield put({ type: 'saveCommodityList', payload: list });
     },
     *clickRemoveButton(action, { put, select }) {
@@ -461,6 +468,7 @@ export default {
       return { ...state, orders: newOrders };
     },
     changePaymentData(state, action) {
+      console.log(1)
       const paymentData = action.payload;
       const { activeKey } = state;
       const newOrders = state.orders.map((item) => {
