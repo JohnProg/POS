@@ -19,12 +19,15 @@ export default {
 
 subscriptions: {
     keyboardWatcher({ dispatch }) {
-      key('⌘+up, ctrl+up', () => { dispatch({type: 'searchCustomer'}) });
+      key('⌘+up, ctrl+up', () => { dispatch({type: 'keyBoardOperationChooseCalculator'}) });
+      if (key.isPressed("M")) alert('M key is pressed, can ya believe it!?');
     },
   },
   effects: {
+    *storageButtonDOM(action, { put }) {
+      const button = action.payload
+    },
     *searchCustomer(_, { call }) {
-      console.log('ctrl+up')
       const { list } = yield call(fetchCustomerList);
     },
     *changePaymentDataAndCheck(action, { put }) {

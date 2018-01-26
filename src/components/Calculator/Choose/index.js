@@ -4,9 +4,21 @@ import { connect } from 'dva';
 import Cbutton from '../Cbutton';
 import calculate from './logic/calculate';
 import { POS_TAB_TYPE } from '../../../constant';
+import key from 'keymaster';
 
+import ReactDOM from 'react-dom';
 
 class ChooseCalculator extends PureComponent {
+  componentDidMount() {
+    const button = this.button.getElementsByTagName('button')[0]
+    this.props.dispatch({type: 'commodity/storageButtonDOM', payload: this.button})
+    key('backspace', () => {
+      button.click()
+       button.focus()
+       setTimeout(() => button.blur(), 500)
+       } );
+
+  }
   clickHandler = (buttonName) => {
     calculate(this.props.commodity, this.props.dispatch, buttonName);
   }
@@ -43,7 +55,7 @@ class ChooseCalculator extends PureComponent {
           }
         </div>
         <div className={styles.numPad}>
-          <Cbutton name="1" clickHandler={this.clickHandler} >1</Cbutton>
+          <Cbutton name="1" clickHandler={this.clickHandler} ref={node => (this.button = ReactDOM.findDOMNode(node))} >1</Cbutton>
           <Cbutton name="2" clickHandler={this.clickHandler}>2</Cbutton>
           <Cbutton name="3" clickHandler={this.clickHandler}>3</Cbutton>
           <Cbutton name="count" datatype="string" clickHandler={this.clickHandler} className={calculateType === 'count' ? styles.activeButton : null}>数量</Cbutton>
