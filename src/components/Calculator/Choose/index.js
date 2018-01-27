@@ -10,13 +10,13 @@ import ReactDOM from 'react-dom';
 
 class ChooseCalculator extends PureComponent {
   componentDidMount() {
-    const button = this.button.getElementsByTagName('button')[0]
-    this.props.dispatch({type: 'commodity/storageButtonDOM', payload: this.button})
-    key('backspace', () => {
-      button.click()
-       button.focus()
-       setTimeout(() => button.blur(), 500)
-       } );
+    // const button = this.button.getElementsByTagName('button')[0]
+    // this.props.dispatch({type: 'commodity/storageButtonDOM', payload: this.button})
+    // key('backspace', () => {
+    //   button.click()
+    //    button.focus()
+    //    setTimeout(() => button.blur(), 500)
+    //    } );
 
   }
   clickHandler = (buttonName) => {

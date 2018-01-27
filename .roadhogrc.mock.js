@@ -26,6 +26,16 @@ const proxy = {
       'Key|+1': 0
     }]
   }),
+  'GET /api/getGoodsToOrder': mockjs.mock({
+    'List|100': [{
+      'Sku|+2': Random.natural(10000000, 99999999),
+      EnglishName: Random.name(),
+      Name: Random.cname(),
+      Specification: Random.natural(10, 500),
+      Storage: Random.natural(0, 1000),
+      'key|+1': 0,
+    }]
+  }),
   'GET /api/getCustomer': mockjs.mock({
     'list|100': [{ Name: Random.cname(), Address: Random.city(), Phone: Random.id(), 'Key|+1': 0 }]
   }),
@@ -95,6 +105,7 @@ const proxy = {
     res.send({ status: 'ok' });
   },
   'GET /api/notices': getNotices,
+
 };
 
 export default noProxy ? {} : delay(proxy, 1000);

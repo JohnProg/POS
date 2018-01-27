@@ -1,22 +1,26 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
 import { Row, Col, Card, Form, Input, Select, Icon, Button, Dropdown, Menu, InputNumber, DatePicker, Modal, message, Table } from 'antd';
-import PageHeaderLayout from '../../layouts/PageHeaderLayout';
+import PageHeaderLayout from '../../../layouts/PageHeaderLayout';
 import { routerRedux } from 'dva/router';
-import { POS_TAB_TYPE } from '../../constant';
+import { POS_TAB_TYPE } from '../../../constant';
+import GoodsList from './GoodsList'
 
-import styles from './AllocateTable.less';
+import styles from './index.less';
 
 const FormItem = Form.Item;
 const { Option } = Select;
 const getValue = obj => Object.keys(obj).map(key => obj[key]).join(',');
 
 @connect(state => ({
-  commodity: state.commodity,
+  goodsList: state.orderGoods.goodsList,
+  isGetGoodsListLoading: state.orderGoods.isGetGoodsListLoading,
 }))
 @Form.create()
-export default class TableList extends PureComponent {
+export default class PlaceAnOrder extends PureComponent {
   state = {
+    goodsOrderedList: [],
+    goodsList: [],
     addInputValue: '',
     modalVisible: false,
     expandForm: false,
@@ -26,8 +30,14 @@ export default class TableList extends PureComponent {
 
   componentDidMount() {
     const { dispatch } = this.props;
+    dispatch({ type: 'orderGoods/fetchGoodsList' })
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.goodsList && Array.isArray(nextProps.goodsList)) {
+      this.setState({ goodsList: nextProps.goodsList })
+    }
+  }
   handleStandardTableChange = (pagination, filtersArg, sorter) => {
     const { dispatch } = this.props;
     const { formValues } = this.state;
@@ -118,8 +128,6 @@ export default class TableList extends PureComponent {
     });
   }
   addHandler = () => {
-    this.props.dispatch(routerRedux.push('/pos/choose'));
-    this.props.dispatch({ type: 'commodity/clickAddButton', payload: POS_TAB_TYPE.ALLOCATEANDTRANSFER });
   }
 
   renderSimpleForm() {
@@ -230,95 +238,56 @@ export default class TableList extends PureComponent {
   renderForm() {
     return this.state.expandForm ? this.renderAdvancedForm() : this.renderSimpleForm();
   }
+  countChangeHandler(value, record) {
+    const { goodsOrderedList } = this.state
+    let newList = []
+    const tempItem = goodsOrderedList.filter(item => item.Sku === record.Sku)[0]
+    if (tempItem) {
+      newList = goodsOrderedList.map(item => {
+        if (item.Sku === tempItem.Sku) { return { ...tempItem, Count: value } }
+        return item
+      })
+    } else {
+      newList = [...goodsOrderedList, { ...record, Count: value }]
+    }
+    const newFilteredList = newList.filter(item => item.Count !== 0)
+    this.setState({ goodsOrderedList: newFilteredList }, () => console.log(this.state.goodsOrderedList))
+  }
+  clickChooseGoodsHandler() {
+    this.setState({modalVisible: true})
+  }
 
   render() {
-    const { selectedRows, modalVisible, addInputValue } = this.state;
+    const { goodsList, isGetGoodsListLoading, } = this.props;
+    const { modalVisible } = this.state
 
     const columns = [
       {
-        title: '编号',
-        dataIndex: 'no',
-        sorter: true,
+        title: 'SKU',
+        dataIndex: 'Sku',
       },
       {
-        title: '部门',
-        dataIndex: 'department',
-        sorter: true,
+        title: '英文名',
+        dataIndex: 'EnglishName',
       },
       {
-        title: '现金',
-        dataIndex: 'cash',
-        sorter: true,
+        title: '中文名',
+        dataIndex: 'Name',
       },
       {
-        title: 'EFTPOS',
-        dataIndex: 'eftpos',
-        sorter: true,
+        title: '规格',
+        dataIndex: 'Specification',
       },
       {
-        title: '银联',
-        dataIndex: 'unionPay',
-        sorter: true,
+        title: '订货数量',
+        dataIndex: 'Count',
+        render: (text, record, index) => (
+          <InputNumber value={text} min={0} max={record.Storage || 0} onChange={(value) => this.countChangeHandler(value, record)} />
+        )
       },
       {
-        title: '转账',
-        dataIndex: 'transfer',
-        sorter: true,
-      },
-      {
-        title: '信用卡',
-        dataIndex: 'creditCard',
-        sorter: true,
-      },
-      {
-        title: 'LatiPay',
-        dataIndex: 'latiPay',
-        sorter: true,
-      },
-      {
-        title: '支付宝',
-        dataIndex: 'Alipay',
-        sorter: true,
-      },
-      {
-        title: '微信',
-        dataIndex: 'WeChatPay',
-        sorter: true,
-      },
-      {
-        title: '总额-1',
-        dataIndex: 'Total1',
-        sorter: true,
-      },
-      {
-        title: '奶粉',
-        dataIndex: 'MilkPowder',
-        sorter: true,
-      },
-      {
-        title: '运费',
-        dataIndex: 'MilkPowderFreight',
-        sorter: true,
-      },
-      {
-        title: '出口保健品',
-        dataIndex: 'exportHealthCareProduct',
-        sorter: true,
-      },
-      {
-        title: '本地保健品',
-        dataIndex: 'localHealthCareProduct',
-        sorter: true,
-      },
-      {
-        title: '总额-2',
-        dataIndex: 'total2',
-        sorter: true,
-      },
-      {
-        title: '差额',
-        dataIndex: 'balance',
-        sorter: true,
+        title: '库存量',
+        dataIndex: 'Storage',
       },
     ];
 
@@ -330,11 +299,25 @@ export default class TableList extends PureComponent {
             <div className={styles.tableListForm}>
               {this.renderForm()}
             </div>
-            <Button type="primary" onClick={this.addHandler}>新建调拨单</Button>
+            <Button type="primary" onClick={() => this.clickChooseGoodsHandler()}>点击选择商品</Button>
+            <Modal
+            visible={modalVisible}
+            onCancel={() => this.setState({modalVisible: false})}
+            width={1200}
+            footer={null}
+            >
+              <GoodsList
+                goodsList={this.state.goodsList}
+                loading={isGetGoodsListLoading}
+                countChangeHandler={this.countChangeHandler.bind(this)}
+              />
+            </Modal>
             <Table
               onChange={this.handleStandardTableChange}
               rowKey={record => record.key}
               columns={columns}
+              dataSource={this.state.goodsOrderedList}
+              pagination={null}
             />
           </div>
         </Card>

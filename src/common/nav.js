@@ -29,7 +29,6 @@ export const getNavData = app => [
       {
         path: 'pos/payment',
         component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/Payment')),
-
       },
       {
         path: 'pos/customer',
@@ -88,6 +87,19 @@ export const getNavData = app => [
         name: '订货管理',
         icon: 'shop',
         path: 'orderGoods',
+        children: [
+          {
+            name: '发起订货',
+            path: 'placeAnOrder',
+            component: dynamicWrapper(app, ['rule', 'orderGoods'], () => import('../routes/OrderGoods/PlaceAnOrder/')),
+          },
+          {
+            name: '订单管理',
+            path: 'cashStatistics',
+            component: dynamicWrapper(app, ['form', 'orderGoods'], () => import('../routes/DailyClosing/CashStatistics')),
+          },
+        ],
+        // component: dynamicWrapper(app, ['user', 'login'], () => import('../routes/OrderGoods/')),
       },
       {
         name: '历史订单',

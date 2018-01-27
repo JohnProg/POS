@@ -2,10 +2,13 @@ import { stringify } from 'qs';
 import request from '../utils/request';
 
 export async function fetchCommodityList() {
-    return request('api/getCommodity')
+  return request('api/getCommodity');
 }
 export async function fetchCustomerList() {
-    return request('api/getCustomer')
+  return request('api/getCustomer');
+}
+export async function fetchGoodsToOrder() {
+  return request('api/getGoodsToOrder');
 }
 
 export async function queryProjectNotice() {
