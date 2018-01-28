@@ -254,7 +254,7 @@ export default class PlaceAnOrder extends PureComponent {
     this.setState({ goodsOrderedList: newFilteredList }, () => console.log(this.state.goodsOrderedList))
   }
   clickChooseGoodsHandler() {
-    this.setState({modalVisible: true})
+    this.setState({ modalVisible: true })
   }
 
   render() {
@@ -301,10 +301,11 @@ export default class PlaceAnOrder extends PureComponent {
             </div>
             <Button type="primary" onClick={() => this.clickChooseGoodsHandler()}>点击选择商品</Button>
             <Modal
-            visible={modalVisible}
-            onCancel={() => this.setState({modalVisible: false})}
-            width={1200}
-            footer={null}
+              visible={modalVisible}
+              onCancel={() => this.setState({ modalVisible: false })}
+              width={1200}
+              footer={null}
+              closable={false}
             >
               <GoodsList
                 goodsList={this.state.goodsList}

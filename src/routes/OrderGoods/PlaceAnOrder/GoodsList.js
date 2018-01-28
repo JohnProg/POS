@@ -1,9 +1,10 @@
-import React, { PureComponent } from 'react'
-import { Table, InputNumber,  } from 'antd'
+import React, { PureComponent } from 'react';
+import { Table, InputNumber } from 'antd';
+import SearchSelect from './SearchSelect';
 
 export default class GoodsList extends PureComponent {
   render() {
-    const { goodsList, loading, countChangeHandler, } = this.props;
+    const { goodsList, loading, countChangeHandler } = this.props;
 
     const columns = [
       {
@@ -26,8 +27,8 @@ export default class GoodsList extends PureComponent {
         title: '订货数量',
         dataIndex: 'Count',
         render: (text, record, index) => (
-          <InputNumber defaultValue={0} min={0} max={record.Storage || 0} onChange={(value) => countChangeHandler(value, record)}  />
-        )
+          <InputNumber defaultValue={0} min={0} max={record.Storage || 0} onChange={value => countChangeHandler(value, record)} />
+        ),
       },
       {
         title: '库存量',
@@ -38,11 +39,12 @@ export default class GoodsList extends PureComponent {
 
     return (
       <div>
-            <Table
-              rowKey={record => record.key}
-              columns={columns}
-              dataSource={goodsList}
-            />
+        <SearchSelect />
+        <Table
+          rowKey={record => record.key}
+          columns={columns}
+          dataSource={goodsList}
+        />
       </div>
     );
   }
