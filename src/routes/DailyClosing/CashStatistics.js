@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { Card, Button, Form, Icon, Col, Row, DatePicker, TimePicker, Input, Select, Popover, InputNumber } from 'antd';
+import { Card, Button, Form, Icon, Col, Row, DatePicker, TimePicker, Input, Select, Popover, InputNumber, Divider, } from 'antd';
 import { connect } from 'dva';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 import FooterToolbar from '../../components/FooterToolbar';
@@ -8,9 +8,20 @@ import styles from './style.less';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
+const { TextArea } = Input
+
+const serviceChargeMapping = {
+  unionPay: 0.022,
+  creditCard: 0.025,
+  aliPay: 0.015,
+  weChatPay: 0.015,
+  eftopsIncome: 1,
+  transferIncome: 1,
+  latiPayIncome: 1,
+};
 
 const fieldLabelsAndNamesMapping = {
-  name: {
+  shopName: {
     label: '店名',
     name: 'ShopName',
   },
@@ -96,7 +107,7 @@ const fieldLabelsAndNamesMapping = {
   },
   creditCardServiceCharge: {
     label: '手续费',
-    name: 'creditCardServiceCharge',
+    name: 'CreditCardServiceCharge',
   },
   aliPay: {
     label: '实际支付宝收款',
@@ -122,36 +133,82 @@ const fieldLabelsAndNamesMapping = {
     label: '手续费',
     name: 'WeChatPayServiceCharge',
   },
-  eftops: {
+  eftopsIncome: {
     label: '实际 EFTOPS 销售',
     name: 'EftopsIncome',
   },
-  // eftops: {
-  //   label: '实际 EFTOPS 销售',
-  //   name: 'EftopsIncome',
-  // },
+  transferIncome: {
+    label: '实际转账销售',
+    name: 'TransferIncome',
+  },
+  latiPayIncome: {
+    label: '实际纽元通 LatiPay 销售',
+    name: 'LatiPayIncome',
+  },
+  frontEndIncome: {
+    label: '前台销售额',
+    name: 'FrontEndIncome',
+  },
+  backEndIncome: {
+    label: '后台销售额',
+    name: 'BackEndIncome',
+  },
+  exportRecord: {
+    label: '出口记录',
+    name: 'ExportRecord',
+  },
+  operator: {
+    label: '操作员',
+    name: 'Operator',
+  },
+  realTotalIncome: {
+    label: '实际总销售额',
+    name: 'RealTotalIncome',
+  },
+  accountTotalIncome: {
+    label: '账面总销售额',
+    name: 'AccountTotalIncome',
+  },
+  difference: {
+    label: '差额',
+    name: 'Difference',
+  },
+  remark: {
+    label: '备注',
+    name: 'Remark',
+  },
 };
 
 const cashFieldsNameMap = {
-  cash100: '100',
-  cash50: '50',
-  cash20: '20',
-  cash10: '10',
-  cash5: '5',
-  cash2: '2',
-  cash1: '1',
-  cash0Dot5: '0Dot5',
-  cash0Dot2: '0Dot2',
-  cash0Dot1: '0Dot1',
+  cash100: 'Cash100',
+  cash50: 'Cash50',
+  cash20: 'Cash20',
+  cash10: 'Cash10',
+  cash5: 'Cash5',
+  cash2: 'Cash2',
+  cash1: 'Cash1',
+  cash0Dot5: 'Cash0Dot5',
+  cash0Dot2: 'Cash0Dot2',
+  cash0Dot1: 'Cash0Dot1',
 };
 
 
+class CashStatistics extends PureComponent {
+  state = {
+    width: '100%',
+  };
+  componentDidMount() {
+    window.addEventListener('resize', this.resizeFooterToolbar);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.resizeFooterToolbar);
+  }
 
-class AdvancedForm extends PureComponent {
   calcTotalCash = () => {
     const cashValues = this.props.form.getFieldsValue(Object.values(cashFieldsNameMap));
     const tempArray = Object.entries(cashValues)
       .filter(item => (item[1]))
+      .map(item => [item[0].replace('Cash', ''), item[1]])
       .map(item => [item[0].replace('Dot', '.'), item[1]])
       .map(item => (item[0] - 0) * item[1]);
     const cashInBox = tempArray.length > 0
@@ -161,32 +218,70 @@ class AdvancedForm extends PureComponent {
       })
       :
       0;
-    const cashOpening = this.props.form.getFieldValue('cashOpening') || 0;
+    const cashOpening = this.props.form.getFieldValue(fieldLabelsAndNamesMapping.cashOpening.name) || 0;
     const income = cashInBox - cashOpening;
     return income;
   }
   calcCashInBank = (cashIncome) => {
-    const cashClosing = this.props.form.getFieldValue('cashClosing') || 0;
+    const cashClosing = this.props.form.getFieldValue(fieldLabelsAndNamesMapping.cashClosing.name) || 0;
     const cashInBank = cashIncome - cashClosing || 0;
     return cashInBank;
+  }
+  calcUnionPayIncome = () => {
+    const unionPay = this.props.form.getFieldValue(fieldLabelsAndNamesMapping.unionPay.name) || 0;
+    const service = unionPay && unionPay * serviceChargeMapping.unionPay;
+    return (unionPay - service).toFixed(2);
+  }
+  calcUnionPayServiceCharge = () => {
+    const unionPay = this.props.form.getFieldValue(fieldLabelsAndNamesMapping.unionPay.name) || 0;
+    const serviceCharge = unionPay && unionPay * serviceChargeMapping.unionPay;
+    return (serviceCharge).toFixed(2);
+  }
+  calcIncome = (name) => {
+    const value = this.props.form.getFieldValue(fieldLabelsAndNamesMapping[name].name) || 0;
+    const serviceCharge = value && value * serviceChargeMapping[name];
+    const income = parseFloat((value - serviceCharge).toFixed(2));
+    // this.props.form.setFieldsValue({[fieldLabelsAndNamesMapping[name]['name']]: income})
+    console.log('income', income)
+    return income;
+  }
+  calcServiceCharge = (name) => {
+    const value = this.props.form.getFieldValue(fieldLabelsAndNamesMapping[name].name) || 0;
+    const serviceCharge = (value && value * serviceChargeMapping[name]).toFixed(2);
+    return parseFloat(serviceCharge);
+  }
+  calcUnCashIncome = () => {
+    const unionPayIncome = this.calcIncome('unionPay');
+    const creditCardIncome = this.calcIncome('creditCard');
+    const aliPayIncome = this.calcIncome('aliPay');
+    const weChatPayIncome = this.calcIncome('weChatPay');
+    const eftopsIncome = this.props.form.getFieldValue(fieldLabelsAndNamesMapping.eftopsIncome.name) || 0;
+    const transferIncome = this.props.form.getFieldValue(fieldLabelsAndNamesMapping.transferIncome.name) || 0;
+    const latiPayIncome = this.props.form.getFieldValue(fieldLabelsAndNamesMapping.latiPayIncome.name) || 0;
+    const income = unionPayIncome + creditCardIncome + aliPayIncome + weChatPayIncome + eftopsIncome + transferIncome + latiPayIncome;
+    return income;
+  }
+  calcTotalAccountIncome = () => {
+    const frontEndIncome = this.props.form.getFieldValue(fieldLabelsAndNamesMapping.frontEndIncome.name) || 0;
+    const backEndIncome = this.props.form.getFieldValue(fieldLabelsAndNamesMapping.backEndIncome.name) || 0;
+    return frontEndIncome + backEndIncome;
   }
   render() {
     const { form, dispatch, submitting } = this.props;
     const { getFieldDecorator, validateFieldsAndScroll, getFieldsError } = form;
     const cashIncome = this.calcTotalCash();
+    const unCashIncome = this.calcUnCashIncome();
+    const totalAccountIncome = this.calcTotalAccountIncome();
     const cashInBank = this.calcCashInBank(cashIncome);
-    const validate = () => {
-      validateFieldsAndScroll((error, values) => {
-        console.log(values);
-        if (!error) {
-          // submit the values
-          dispatch({
-            type: 'form/submitAdvancedForm',
-            payload: values,
-          });
-        }
-      });
-    };
+    const unionPayIncome = this.calcIncome('unionPay')
+    const unionPayServiceCharge = this.calcServiceCharge('unionPay')
+    const unionPayIntoAccount = this.calcServiceCharge('unionPay')
+    const creditCardIncome = this.calcIncome('creditCard')
+    const creditCardServiceCharge = this.calcServiceCharge('creditCard')
+    const aliPayIncome = this.calcIncome('aliPay')
+    const aliPayServiceCharge = this.calcServiceCharge('aliPay')
+    const realTotalIncome = cashIncome + unCashIncome
+    const difference = parseFloat((realTotalIncome - totalAccountIncome).toFixed(2))
     const errors = getFieldsError();
     const getErrorInfo = () => {
       const errorCount = Object.keys(errors).filter(key => errors[key]).length;
@@ -200,6 +295,9 @@ class AdvancedForm extends PureComponent {
         }
       };
       const errorList = Object.keys(errors).map((key) => {
+        let item = [ ...key ]
+        item[0] = item[0].toLowerCase()
+        item = item.join('')
         if (!errors[key]) {
           return null;
         }
@@ -207,7 +305,7 @@ class AdvancedForm extends PureComponent {
           <li key={key} className={styles.errorListItem} onClick={() => scrollToField(key)}>
             <Icon type="cross-circle-o" className={styles.errorIcon} />
             <div className={styles.errorMessage}>{errors[key][0]}</div>
-            <div className={styles.errorField}>{fieldLabels[key]}</div>
+            <div className={styles.errorField}>{fieldLabelsAndNamesMapping[item]['label']}</div>
           </li>
         );
       });
@@ -233,10 +331,70 @@ class AdvancedForm extends PureComponent {
     const formItemLayout = {
       labelCol: { span: 16 },
       wrapperCol: { span: 8 },
-    }
+    };
+    const basicFormItemLayout = {
+      labelCol: { span: 6 },
+      wrapperCol: { span: 18 },
+    };
     const extraCash = (
       <span>实际现金销售：{cashIncome}</span>
     );
+    const extraUnCash = (
+      <span>实际非现金销售：{unCashIncome}</span>
+    );
+    const extraTotalAccountIncome = (
+      <span>账面总销售额: {totalAccountIncome}</span>
+    );
+    const footerExtra = (
+              <Row gutter={16} className={styles.footerExtra}>
+                <Col lg={6} md={12} sm={24}>
+                  <Form.Item label={fieldLabelsAndNamesMapping.realTotalIncome.label} {...formItemLayout} >
+                    {getFieldDecorator(fieldLabelsAndNamesMapping.realTotalIncome.name, {
+                      initialValue: 0,
+                    })(
+                      <span>{realTotalIncome}</span>
+                      )}
+                  </Form.Item>
+                </Col>
+                <Col lg={6} md={12} sm={24}>
+                  <Form.Item label={fieldLabelsAndNamesMapping.accountTotalIncome.label} {...formItemLayout} >
+                    {getFieldDecorator(fieldLabelsAndNamesMapping.accountTotalIncome.name, {
+                      initialValue: 0,
+                    })(
+                      <span>{totalAccountIncome}</span>
+                      )}
+                  </Form.Item>
+                </Col>
+                <Col lg={6} md={12} sm={24}>
+                  <Form.Item label={fieldLabelsAndNamesMapping.difference.label} {...formItemLayout} >
+                    {getFieldDecorator(fieldLabelsAndNamesMapping.difference.name, {
+                      initialValue: 0,
+                    })(
+                      <span>{difference}</span>
+                      )}
+                  </Form.Item>
+                </Col>
+              </Row>
+      // <div>
+      //   <span>实际总销售额 {unCashIncome + cashIncome}</span>
+      //   <Divider type="vertical" />
+      //   <span>账面中销售额 {totalAccountIncome}</span>
+      //   <Divider type="vertical" />
+      //   <span>差额 {(unCashIncome + cashIncome - totalAccountIncome).toFixed(2)}</span>
+      // </div>
+    )
+    const validate = () => {
+      validateFieldsAndScroll((error, values) => {
+        if (!error) {
+          // submit the values
+        console.log(values);
+          // dispatch({
+          //   type: 'form/submitAdvancedForm',
+          //   payload: values,
+          // });
+        }
+      });
+    };
     return (
       <PageHeaderLayout
         title="现金收款复查"
@@ -244,7 +402,7 @@ class AdvancedForm extends PureComponent {
       >
         <Card title="基本信息" className={styles.card} bordered={false} />
         <Card title="在岗营业员" className={styles.card} bordered={false}>
-          <Form hideRequiredMark>
+          <Form layout="horizontal" >
             <Row guuter={16}>
               <Col lg={12} md={12} sm={24}>
                 <Form.Item label={fieldLabelsAndNamesMapping.shopAssistant.label}>
@@ -268,14 +426,16 @@ class AdvancedForm extends PureComponent {
                 <Col lg={4} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.cash100.label} {...cashFormItemLayout}>
                     {getFieldDecorator(fieldLabelsAndNamesMapping.cash100.name, {
+                      initialValue: 0,
                     })(
-                      <InputNumber min={0} precision={0}  />
+                      <InputNumber min={0} precision={0} />
                       )}
                   </Form.Item>
                 </Col>
                 <Col lg={4} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.cash50.label} {...cashFormItemLayout} >
                     {getFieldDecorator(fieldLabelsAndNamesMapping.cash50.name, {
+                      initialValue: 0,
                     })(
                       <InputNumber min={0} precision={0} />
                       )}
@@ -284,6 +444,7 @@ class AdvancedForm extends PureComponent {
                 <Col lg={4} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.cash20.label} {...cashFormItemLayout}>
                     {getFieldDecorator(fieldLabelsAndNamesMapping.cash20.name, {
+                      initialValue: 0,
                     })(
                       <InputNumber min={0} precision={0} />
                       )}
@@ -292,6 +453,7 @@ class AdvancedForm extends PureComponent {
                 <Col lg={4} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.cash10.label} {...cashFormItemLayout}>
                     {getFieldDecorator(fieldLabelsAndNamesMapping.cash10.name, {
+                      initialValue: 0,
                     })(
                       <InputNumber min={0} precision={0} />
                       )}
@@ -300,6 +462,7 @@ class AdvancedForm extends PureComponent {
                 <Col lg={4} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.cash5.label} {...cashFormItemLayout}>
                     {getFieldDecorator(fieldLabelsAndNamesMapping.cash5.name, {
+                      initialValue: 0,
                     })(
                       <InputNumber min={0} precision={0} />
                       )}
@@ -310,40 +473,45 @@ class AdvancedForm extends PureComponent {
                 <Col lg={4} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.cash2.label} {...cashFormItemLayout}>
                     {getFieldDecorator(fieldLabelsAndNamesMapping.cash2.name, {
+                      initialValue: 0,
                     })(
-                      <InputNumber min={0} precision={0}  />
+                      <InputNumber min={0} precision={0} />
                       )}
                   </Form.Item>
                 </Col>
                 <Col lg={4} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.cash1.label} {...cashFormItemLayout}>
                     {getFieldDecorator(fieldLabelsAndNamesMapping.cash1.name, {
+                      initialValue: 0,
                     })(
-                      <InputNumber min={0} precision={0}  />
+                      <InputNumber min={0} precision={0} />
                       )}
                   </Form.Item>
                 </Col>
                 <Col lg={4} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.cash0Dot5.label} {...cashFormItemLayout}>
                     {getFieldDecorator(fieldLabelsAndNamesMapping.cash0Dot5.name, {
+                      initialValue: 0,
                     })(
-                      <InputNumber min={0} precision={0}  />
+                      <InputNumber min={0} precision={0} />
                       )}
                   </Form.Item>
                 </Col>
                 <Col lg={4} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.cash0Dot2.label} {...cashFormItemLayout}>
                     {getFieldDecorator(fieldLabelsAndNamesMapping.cash0Dot2.name, {
+                      initialValue: 0,
                     })(
-                      <InputNumber min={0} precision={0}  />
+                      <InputNumber min={0} precision={0} />
                       )}
                   </Form.Item>
                 </Col>
                 <Col lg={4} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.cash0Dot1.label} {...cashFormItemLayout}>
                     {getFieldDecorator(fieldLabelsAndNamesMapping.cash0Dot1.name, {
+                      initialValue: 0,
                     })(
-                      <InputNumber min={0} precision={0}  />
+                      <InputNumber min={0} precision={0} />
                       )}
                   </Form.Item>
                 </Col>
@@ -352,6 +520,7 @@ class AdvancedForm extends PureComponent {
                 <Col lg={4} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.cashOpening.label} {...cashFormItemLayout}>
                     {getFieldDecorator(fieldLabelsAndNamesMapping.cashOpening.name, {
+                      initialValue: 0,
                       rules: [{ required: true, message: '开箱金额' }],
                     })(
                       <InputNumber min={0} />
@@ -361,6 +530,7 @@ class AdvancedForm extends PureComponent {
                 <Col lg={4} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.cashClosing.label} {...cashFormItemLayout}>
                     {getFieldDecorator(fieldLabelsAndNamesMapping.cashClosing.name, {
+                      initialValue: 0,
                       rules: [{ required: true, message: '闭箱金额' }],
                     })(
                       <InputNumber min={0} />
@@ -370,6 +540,7 @@ class AdvancedForm extends PureComponent {
                 <Col lg={4} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.bankSaving.label} {...cashFormItemLayout}>
                     {getFieldDecorator(fieldLabelsAndNamesMapping.bankSaving.name, {
+                      initialValue: 0,
                     })(
                       <span>{cashInBank}</span>
                       )}
@@ -378,38 +549,42 @@ class AdvancedForm extends PureComponent {
               </Row>
             </Form>
           </Card>
-          <Card title="非现金" className={styles.card} type="inner" extra={extraCash}>
+          <Card title="非现金" className={styles.card} type="inner" extra={extraUnCash}>
             <Form layout="horizontal" hideRequiredMark>
               <Row gutter={16}>
                 <Col lg={6} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.unionPay.label} {...formItemLayout} >
                     {getFieldDecorator(fieldLabelsAndNamesMapping.unionPay.name, {
+                      initialValue: 0,
                     })(
-                      <InputNumber min={0} precision={0}  />
+                      <InputNumber min={0} precision={0} />
                       )}
                   </Form.Item>
                 </Col>
                 <Col lg={6} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.unionPayIncome.label} {...formItemLayout} >
                     {getFieldDecorator(fieldLabelsAndNamesMapping.unionPayIncome.name, {
+                      initialValue: 0,
                     })(
-                      <span></span>
+                      <span>{this.calcIncome('unionPay')}</span>
                       )}
                   </Form.Item>
                 </Col>
                 <Col lg={6} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.unionPayServiceCharge.label} {...formItemLayout}>
                     {getFieldDecorator(fieldLabelsAndNamesMapping.unionPayServiceCharge.name, {
+                      initialValue: 0,
                     })(
-                      <span></span>
+                      <span>{this.calcServiceCharge('unionPay')}</span>
                       )}
                   </Form.Item>
                 </Col>
                 <Col lg={6} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.unionPayIntoAccount.label} {...formItemLayout}>
                     {getFieldDecorator(fieldLabelsAndNamesMapping.unionPayIntoAccount.name, {
+                      initialValue: 0,
                     })(
-                      <span></span>
+                      <span>{this.calcIncome('unionPay')}</span>
                       )}
                   </Form.Item>
                 </Col>
@@ -418,24 +593,27 @@ class AdvancedForm extends PureComponent {
                 <Col lg={6} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.creditCard.label} {...formItemLayout} >
                     {getFieldDecorator(fieldLabelsAndNamesMapping.creditCard.name, {
+                      initialValue: 0,
                     })(
-                      <InputNumber min={0} precision={0}  />
+                      <InputNumber min={0} precision={0} />
                       )}
                   </Form.Item>
                 </Col>
                 <Col lg={6} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.creditCardIncome.label} {...formItemLayout} >
                     {getFieldDecorator(fieldLabelsAndNamesMapping.creditCardIncome.name, {
+                      initialValue: 0,
                     })(
-                      <span></span>
+                      <span>{this.calcIncome('creditCard')}</span>
                       )}
                   </Form.Item>
                 </Col>
                 <Col lg={6} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.creditCardServiceCharge.label} {...formItemLayout}>
                     {getFieldDecorator(fieldLabelsAndNamesMapping.creditCardServiceCharge.name, {
+                      initialValue: 0,
                     })(
-                      <span></span>
+                      <span>{this.calcServiceCharge('creditCard')}</span>
                       )}
                   </Form.Item>
                 </Col>
@@ -444,24 +622,27 @@ class AdvancedForm extends PureComponent {
                 <Col lg={6} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.aliPay.label} {...formItemLayout} >
                     {getFieldDecorator(fieldLabelsAndNamesMapping.aliPay.name, {
+                      initialValue: 0,
                     })(
-                      <InputNumber min={0} precision={0}  />
+                      <InputNumber min={0} precision={0} />
                       )}
                   </Form.Item>
                 </Col>
                 <Col lg={6} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.aliPayIncome.label} {...formItemLayout} >
                     {getFieldDecorator(fieldLabelsAndNamesMapping.aliPayIncome.name, {
+                      initialValue: 0,
                     })(
-                      <span></span>
+                      <span>{this.calcIncome('aliPay')}</span>
                       )}
                   </Form.Item>
                 </Col>
                 <Col lg={6} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.aliPayServiceCharge.label} {...formItemLayout}>
                     {getFieldDecorator(fieldLabelsAndNamesMapping.aliPayServiceCharge.name, {
+                      initialValue: 0,
                     })(
-                      <span></span>
+                      <span>{this.calcServiceCharge('aliPay')}</span>
                       )}
                   </Form.Item>
                 </Col>
@@ -470,24 +651,121 @@ class AdvancedForm extends PureComponent {
                 <Col lg={6} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.weChatPay.label} {...formItemLayout} >
                     {getFieldDecorator(fieldLabelsAndNamesMapping.weChatPay.name, {
+                      initialValue: 0,
                     })(
-                      <InputNumber min={0} precision={0}  />
+                      <InputNumber min={0} precision={0} />
                       )}
                   </Form.Item>
                 </Col>
                 <Col lg={6} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.weChatPayIncome.label} {...formItemLayout} >
                     {getFieldDecorator(fieldLabelsAndNamesMapping.weChatPayIncome.name, {
+                      initialValue: 0,
                     })(
-                      <span></span>
+                      <span>{this.calcIncome('weChatPay')}</span>
                       )}
                   </Form.Item>
                 </Col>
                 <Col lg={6} md={12} sm={24}>
                   <Form.Item label={fieldLabelsAndNamesMapping.weChatPayServiceCharge.label} {...formItemLayout}>
                     {getFieldDecorator(fieldLabelsAndNamesMapping.weChatPayServiceCharge.name, {
+                      initialValue: 0,
                     })(
-                      <span></span>
+                      <span>{this.calcServiceCharge('weChatPay')}</span>
+                      )}
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={16}>
+                <Col lg={6} md={12} sm={24}>
+                  <Form.Item label={fieldLabelsAndNamesMapping.eftopsIncome.label} {...formItemLayout} >
+                    {getFieldDecorator(fieldLabelsAndNamesMapping.eftopsIncome.name, {
+                      initialValue: 0,
+                    })(
+                      <InputNumber min={0} precision={0} />
+                      )}
+                  </Form.Item>
+                </Col>
+                <Col lg={6} md={12} sm={24}>
+                  <Form.Item label={fieldLabelsAndNamesMapping.transferIncome.label} {...formItemLayout} >
+                    {getFieldDecorator(fieldLabelsAndNamesMapping.transferIncome.name, {
+                      initialValue: 0,
+                    })(
+                      <InputNumber min={0} precision={0} />
+                      )}
+                  </Form.Item>
+                </Col>
+                <Col lg={6} md={12} sm={24}>
+                  <Form.Item label={fieldLabelsAndNamesMapping.latiPayIncome.label} {...formItemLayout}>
+                    {getFieldDecorator(fieldLabelsAndNamesMapping.latiPayIncome.name, {
+                      initialValue: 0,
+                    })(
+                      <InputNumber min={0} precision={2} />
+                      )}
+                  </Form.Item>
+                </Col>
+              </Row>
+            </Form>
+          </Card>
+          <Card title="账面收入" className={styles.card} type="inner" extra={extraTotalAccountIncome}>
+            <Form layout="horizontal" hideRequiredMark>
+              <Row gutter={16}>
+                <Col lg={6} md={12} sm={24}>
+                  <Form.Item label={fieldLabelsAndNamesMapping.frontEndIncome.label} {...formItemLayout} >
+                    {getFieldDecorator(fieldLabelsAndNamesMapping.frontEndIncome.name, {
+                      initialValue: 0,
+                    })(
+                      <InputNumber min={0} precision={2} />
+                      )}
+                  </Form.Item>
+                </Col>
+                <Col lg={6} md={12} sm={24}>
+                  <Form.Item label={fieldLabelsAndNamesMapping.backEndIncome.label} {...formItemLayout} >
+                    {getFieldDecorator(fieldLabelsAndNamesMapping.backEndIncome.name, {
+                      initialValue: 0,
+                    })(
+                      <InputNumber min={0} precision={2} />
+                      )}
+                  </Form.Item>
+                </Col>
+              </Row>
+            </Form>
+          </Card>
+          <Card title="出口记录" className={styles.card} type="inner" >
+            <Form layout="horizontal" hideRequiredMark>
+              <Row gutter={16}>
+                <Col lg={12} md={12} sm={24}>
+                  <Form.Item label={fieldLabelsAndNamesMapping.exportRecord.label} {...basicFormItemLayout} >
+                    {getFieldDecorator(fieldLabelsAndNamesMapping.exportRecord.name, {
+                    })(
+                      <Select
+                        mode="tags"
+                        style={{ width: '100%' }}
+                        tokenSeparators={[',', ';', '，', '；']}
+                      />
+                      )}
+                  </Form.Item>
+                </Col>
+                <Col lg={12} md={12} sm={24}>
+                  <Form.Item label={fieldLabelsAndNamesMapping.operator.label} {...basicFormItemLayout} >
+                    {getFieldDecorator(fieldLabelsAndNamesMapping.operator.name, {
+                      initialValue: 0,
+                    })(
+                      <Input />
+                      )}
+                  </Form.Item>
+                </Col>
+              </Row>
+            </Form>
+          </Card>
+          <Card title="备注" className={styles.card} type="inner" >
+            <Form layout="horizontal" hideRequiredMark>
+              <Row gutter={16}>
+                <Col lg={24} md={24} sm={24}>
+                  <Form.Item>
+                    {getFieldDecorator(fieldLabelsAndNamesMapping.remark.name, {
+                    })(
+                      <TextArea style={{ width: '100%' }} />
                       )}
                   </Form.Item>
                 </Col>
@@ -496,11 +774,11 @@ class AdvancedForm extends PureComponent {
           </Card>
         </Card>
 
-        <FooterToolbar>
+        <FooterToolbar extra={footerExtra} style={{ width: this.state.wdith, paddingLeft: this.props.collapsed ? 100 : 280 }}>
           {getErrorInfo()}
           <Button type="primary" onClick={validate} loading={submitting}>
             提交
-                  </Button>
+          </Button>
         </FooterToolbar>
       </PageHeaderLayout>
     );
@@ -510,4 +788,4 @@ class AdvancedForm extends PureComponent {
 export default connect(state => ({
   collapsed: state.global.collapsed,
   submitting: state.form.advancedFormSubmitting,
-}))(Form.create()(AdvancedForm));
+}))(Form.create()(CashStatistics));
