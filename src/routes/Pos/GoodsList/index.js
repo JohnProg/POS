@@ -8,6 +8,7 @@ import styles from './index.less';
 import classNames from 'classnames';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
+import { POS_TAB_TYPE } from '../../../constant';
 
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
@@ -23,7 +24,7 @@ export default class GoodsList extends PureComponent {
     const { commodity, dispatch } = this.props;
     const view = this.props.location && this.props.location.pathname.replace('/pos/', '');
     const currentOrder = commodity.orders.filter(item => (item.key === commodity.activeKey))[0];
-    const { content, display, saleType } = currentOrder;
+    const { content, display, saleType, type } = currentOrder;
     const displayTable = cx({
       [styles.trigger]: true,
       [styles.activeTrigger]: view === 'table',
@@ -66,14 +67,20 @@ export default class GoodsList extends PureComponent {
               onClick={() => { dispatch(routerRedux.push('/pos/table')); }}
             />
 
-            <RadioGroup
-              defaultValue="Local"
-              onChange={e => dispatch({ type: 'commodity/clickChangeSaleTypeButton', payload: e.target.value })}
-            >
-              <RadioButton value="Local">本地</RadioButton>
-              <RadioButton value="Express">邮寄</RadioButton>
-            </RadioGroup>
+            {
+              type === POS_TAB_TYPE.SALE && (
 
+                <RadioGroup
+                  value={saleType}
+                  onChange={e => dispatch({ type: 'commodity/clickChangeSaleTypeButton', payload: e.target.value })}
+                  style={{ marginLeft: 24 }}
+                >
+                  <RadioButton value="Local">本地</RadioButton>
+                  <RadioButton value="Express">邮寄</RadioButton>
+                  <RadioButton value="DropShipping">代发</RadioButton>
+                </RadioGroup>
+              )
+            }
             <div className={styles.right}>
               <HeaderSearch
                 className={`${styles.action} ${styles.search}`}

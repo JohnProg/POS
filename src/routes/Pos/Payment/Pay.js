@@ -1,9 +1,12 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
 import Mbutton from './Mbutton';
-import { Row, Col, Table, Button, Icon } from 'antd';
-import styles from './LocalSale.less';
+import { Row, Col, Table, Button, Icon, Card } from 'antd';
+import styles from './Pay.less';
 import PaymentCalculator from '../../../components/Calculator/Payment/';
+import DescriptionList from '../../../components/DescriptionList';
+
+const { Description } = DescriptionList
 
 const paymentMethods = [
   { name: '现金', value: 'Cash' },
@@ -16,7 +19,7 @@ const paymentMethods = [
   { name: '微信', value: 'WechatPay' },
 ];
 
-class LocalSale extends PureComponent {
+class Pay extends PureComponent {
   componentDidMount() {
     const paymentData = this.props.order.paymentData;
     Array.isArray(paymentData) && paymentData.length > 0 && this.props.dispatch({ type: 'commodity/checkPaymentData' });
@@ -71,9 +74,10 @@ class LocalSale extends PureComponent {
       },
     }];
     return (
+      <Card title="支付" bordered={false} style={{marginBottom: 24 }}>
       <Row>
         <Col
-          span={8}
+          span={6}
           className={styles.leftContent}
         >
           {
@@ -88,7 +92,7 @@ class LocalSale extends PureComponent {
           }
 
         </Col>
-        <Col span={16}>
+        <Col span={18}>
           <Row className={styles.rightContent}>
             <Col span={24} className={styles.top}>
               <Table
@@ -96,6 +100,7 @@ class LocalSale extends PureComponent {
                 dataSource={paymentData}
                 pagination={false}
                 onRow={this.handleRowClick}
+                locale={{emptyText: '请选择支付方式'}}
                 rowClassName={(record, index) => {
                   if (index === this.props.order.activePaymentDataIndex) {
                     if (record.giveChange > 0) {
@@ -112,25 +117,19 @@ class LocalSale extends PureComponent {
             </Col>
             <Col span={24} className={styles.bottom}>
               <Row>
-                <Col span={12}>
+                <Col span={6}>
                   <PaymentCalculator />
-                </Col>
-                <Col span={12}>
-                  <div className={styles.options}>
-                    <Button>
-                      客户
-                    </Button>
-                  </div>
                 </Col>
               </Row>
             </Col>
           </Row>
         </Col>
       </Row>
+      </Card>
     );
   }
 }
 export default connect(state => ({
   order: state.commodity.orders.filter(item => item.key === state.commodity.activeKey)[0],
   activeTabKey: state.commodity.activeKey,
-}))(LocalSale);
+}))(Pay);

@@ -16,28 +16,6 @@ export default class Express extends PureComponent {
     const { goodsPrice } = this.props.order;
     return (
       <div className={styles.expressWrapper}>
-        <Row>
-
-          {/* <Row
-            type="flex"
-            className={styles.header}
-            justify="space-between"
-            align="middle"
-          >
-            <Col>
-              <Button onClick={this.handlePrevClick}>回退</Button>
-            </Col>
-            <Col style={{ textAlign: 'center' }}>
-              <span>商品金额:{goodsPrice}</span>
-              <span>邮费金额</span>
-            </Col>
-            <Col style={{ textAlign: 'right' }}>
-              <Button>
-                确认
-              </Button>
-            </Col>
-          </Row> */}
-        </Row>
         <TableForm
         dispatch={dispatch}
         dataSource={order.expressData || []}

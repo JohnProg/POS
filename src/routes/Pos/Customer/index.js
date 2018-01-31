@@ -23,16 +23,24 @@ const fieldLabels = {
 
 const columns = [
   {
-    title: '客户名称',
+    title: '会员名称',
     dataIndex: 'Name',
   },
   {
+    title: '会员类型',
+    dataIndex: 'Type',
+  },
+  {
+    title: '会员卡号',
+    dataIndex: 'Number',
+  },
+  {
     title: '地址',
-    dataIndex: 'address',
+    dataIndex: 'Address',
   },
   {
     title: '电话',
-    dataIndex: 'Phone',
+    dataIndex: 'PhoneNumber',
   }
 ]
 
@@ -79,7 +87,6 @@ class Payment extends PureComponent {
     });
   }
   toggleCustomerFormHandler = () => {
-    console.log(222)
     this.setState({
       showAddCustomerForm: !this.state.showAddCustomerForm,
     })
@@ -89,7 +96,6 @@ class Payment extends PureComponent {
     const { totalPrice } = this.props.order
     const { getFieldDecorator } = form
     const { showAddCustomerForm } = this.state
-    console.log(showAddCustomerForm)
     const addCustomerForm = (
       <Form
         onSubmit={this.handleAddCustomerFormSubmit}

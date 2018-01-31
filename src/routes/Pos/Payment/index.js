@@ -1,20 +1,26 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import { Button, Badge, Row, Col, Icon, Table, Radio, List } from 'antd';
+import { Button, Badge, Row, Col, Icon, Table, Radio, List, Card, Divider } from 'antd';
 import styles from './index.less';
-import LocalSale from './LocalSale';
-import Express from '../Express';
+import Pay from './Pay';
+import ExpressHandler from '../ExpressHandler';
+import { POS_TAB_TYPE } from '../../../constant';
+import Print from 'rc-print';
+import MilkPowderHandler from './MilkPowderHandler';
+import SaleHandler from './SaleHandler';
+import DescriptionList from '../../../components/DescriptionList';
 // import WareHouse from './WareHouse';
 
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
+const { Description } = DescriptionList
 
 @connect(state => ({
   order: state.commodity.orders.filter(item => item.key === state.commodity.activeKey)[0],
   activeTabKey: state.commodity.activeKey,
 }))
-class Payment extends PureComponent {
+export default class Payment extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -29,9 +35,12 @@ class Payment extends PureComponent {
       isConfirmEnable: bool,
     });
   }
+  confirmHandler = () => {
+    // if (POS_TAB_TYPE) ===
+  }
   render() {
     const { dispatch } = this.props;
-    const { goodsPrice, expressCost, totalPrice, saleType, realMoney, changeMoney } = this.props.order;
+    const { goodsPrice, expressCost, totalPrice, saleType, realMoney, changeMoney, type } = this.props.order;
     const priceList = [
       { title: '商品金额', value: goodsPrice },
       { title: '邮费金额', value: expressCost },
@@ -39,9 +48,23 @@ class Payment extends PureComponent {
       { title: '实收金额', value: realMoney },
       { title: '找零金额', value: changeMoney },
     ];
+
+
+    const generateContent = () => {
+      switch (type) {
+        case POS_TAB_TYPE.SALE: {
+          return <SaleHandler saleType={saleType} dispatch={dispatch} />
+        }
+        case POS_TAB_TYPE.MILKPOWDER: {
+          return <MilkPowderHandler />
+        }
+        default:
+          return null
+      }
+    }
     return (
       <div className={styles.paymentLayout}>
-        <div>left</div>
+        {/* <div>left</div> */}
         <div className={styles.paymentWrapper}>
           <Row
             type="flex"
@@ -52,40 +75,55 @@ class Payment extends PureComponent {
             <Col>
               <Button onClick={this.handlePrevClick}>回退</Button>
             </Col>
-            <Col style={{ textAlign: 'center' }}>
-              <span>商品金额:{goodsPrice}</span>
-              <span>邮费金额:{expressCost}</span>
-            </Col>
             <Col style={{ textAlign: 'right' }}>
               <Button
-                disabled={!this.state.isConfirmEnable}
+                onClick={this.confirmHandler}
+                disabled={totalPrice === 0 || totalPrice !== realMoney - changeMoney}
               >确认
+              </Button>
+              <Button
+                disabled={totalPrice === 0 || totalPrice !== realMoney - changeMoney}
+                onClick={() => {
+                  this.refs.printForm.onPrint();
+                }}
+              >
+                打印
               </Button>
             </Col>
           </Row>
-          <RadioGroup
-            defaultValue="Local"
-            onChange={e => dispatch({ type: 'commodity/clickChangeSaleTypeButton', payload: e.target.value })}
-          >
-            <RadioButton value="Local">本地</RadioButton>
-            <RadioButton value="Express">邮寄</RadioButton>
-          </RadioGroup>
-          {
-            saleType !== 'Local' ? <Express /> : null
-          }
-          <LocalSale
+          <Card title="订单信息" style={{ marginBottom: 24 }} extra={<a>选择或新建客户</a>}>
+            <DescriptionList>
+              <Description term="订单号">32943898021309809423</Description>
+              <Description term="订单类型">门店销售/本地</Description>
+              <Description term="下单时间">2017-07-07</Description>
+            </DescriptionList>
+            <Divider style={{ margin: '16px 0' }} />
+            {/* <Card type="inner" title="多层级信息组"> */}
+            <DescriptionList size="small" style={{ marginBottom: 16 }} title="客户信息">
+              <DescriptionList>
+                <Description term="客户名">付小小</Description>
+                <Description term="会员卡号">32943898021309809423</Description>
+                <Description term="电子邮箱">ossica2018@163.com</Description>
+                <Description term="电话">18112345678</Description>
+                <Description term="地址">曲丽丽 18100000000 浙江省杭州市西湖区黄姑山路工专路交叉路口</Description>
+              </DescriptionList>
+            </DescriptionList>
+            {/* </Card> */}
+
+          </Card>
+          {generateContent()}
+          <Pay
             totalPrice={goodsPrice}
             validate={this.validate}
           />
         </div>
-        <div />
         <List
           dataSource={priceList}
           className={styles.priceList}
           renderItem={item => (
             <div className={styles.priceListItem}>
-                  <h2>{item.title}:</h2>
-                  <h2>{item.value}</h2>
+              <h2>{item.title}:</h2>
+              <h2>{item.value}</h2>
             </div>
           )}
         />
@@ -93,7 +131,3 @@ class Payment extends PureComponent {
     );
   }
 }
-export default connect(state => ({
-  order: state.commodity.orders.filter(item => item.key === state.commodity.activeKey)[0],
-  activeTabKey: state.commodity.activeKey,
-}))(Payment);

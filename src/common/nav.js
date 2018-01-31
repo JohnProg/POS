@@ -36,7 +36,7 @@ export const getNavData = app => [
       },
       {
         path: 'pos/express',
-        component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/Express')),
+        component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/ExpressHandler')),
       },
       // children: [
       //     {

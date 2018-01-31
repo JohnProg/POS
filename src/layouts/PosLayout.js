@@ -15,6 +15,7 @@ import ChooseCalculator from '../components/Calculator/Choose/';
 import SelectedGoods from '../components/List/SelectedGoods/';
 import { POS_TAB_TYPE } from '../constant';
 import classnames from 'classnames';
+import { routerRedux } from 'dva/router';
 
 const cls = classnames.bind(styles);
 
@@ -122,8 +123,10 @@ class PosLayout extends PureComponent {
     if (activeKey === '+') {
       this.props.dispatch({ type: 'commodity/clickAddButton', payload: POS_TAB_TYPE.SALE });
       return;
-    }
-    if (activeKey === '-') {
+    } else if (activeKey === '-') {
+      return;
+    } else if (activeKey === 'leftHeader') {
+      this.props.dispatch(routerRedux.push('/'));
       return;
     }
     this.props.dispatch({ type: 'commodity/changeActiveTabKey', payload: activeKey });
@@ -132,29 +135,17 @@ class PosLayout extends PureComponent {
     this.props.dispatch({ type: 'commodity/clickRemoveButton', payload: currentIndex });
   }
   render() {
-    const { currentUser, collapsed, fetchingNotices, getRouteData } = this.props;
+    const { currentUser, collapsed, fetchingNotices, getRouteData, dispatch } = this.props;
     const { orders, activeKey } = this.props.commodity || {};
     const currentIndex = orders.findIndex(item => item.key === activeKey);
     const createTabTitle = (title, type, key, currentTime) => {
       const tabsBarContentCls = cls({
         [styles.tabsBarContent]: true,
         [styles.tabsBarContentAllocate]: type === POS_TAB_TYPE.ALLOCATEANDTRANSFER,
+        [styles.tabsBarContentMilkPowder]: type === POS_TAB_TYPE.MILKPOWDER,
+        [styles.tabsBarContentWholeSale]: type === POS_TAB_TYPE.WHOLESALE,
       });
       const activeTabKey = activeKey;
-      if (title === '+') {
-        return (
-          <div className={styles.operationButton}>
-            <Icon type="plus" />
-          </div>
-        );
-      }
-      if (title === '-') {
-        return (
-          <div className={styles.operationButton}>
-            <Icon type="minus" onClick={this.remove.bind(this, currentIndex)} />
-          </div>
-        );
-      }
       if (typeof title === 'number') {
         const tabsBarElement = (
           <div className={tabsBarContentCls}>
@@ -167,6 +158,16 @@ class PosLayout extends PureComponent {
         return tabsBarElement;
       }
     };
+    const plusButton = (
+      <div className={styles.operationButton}>
+        <Icon type="plus" />
+      </div>
+    );
+    const minusButton = (
+      <div className={styles.operationButton}>
+        <Icon type="minus" onClick={this.remove.bind(this, currentIndex)} />
+      </div>
+    );
     const menu = (
       <Menu className={styles.menu} selectedKeys={[]} onClick={this.onMenuClick}>
         <Menu.Item disabled><Icon type="user" />个人中心</Menu.Item>
@@ -183,6 +184,33 @@ class PosLayout extends PureComponent {
         </Link>
       </div>
     );
+    // const rightButtonListData = []
+
+    const rightButtonList = (
+      <div>
+        <div>
+          <Button>111</Button>
+        </div>
+        <div>
+          <Button>111</Button>
+        </div>
+      </div>
+    );
+    const rightButtonMenu = (
+      <Menu>
+    <Menu.Item key="0">
+      <a onClick={() => dispatch({ type: 'commodity/clickAddButton', payload: POS_TAB_TYPE.MILKPOWDER })}>新建奶粉/生鲜订单</a>
+    </Menu.Item>
+    <Menu.Item key="1">
+      <a onClick={() => dispatch({ type: 'commodity/clickAddButton', payload: POS_TAB_TYPE.WHOLESALE })}>新建批发订单</a>
+    </Menu.Item>
+  </Menu>
+    );
+    const rightButton = (
+      <Dropdown overlay={rightButtonMenu} trigger={['click']}>
+        <Button icon="left"j />
+      </Dropdown>
+    );
 
 
     const layout = (
@@ -194,11 +222,12 @@ class PosLayout extends PureComponent {
             >
               <Tabs
                 hideAdd
-                tabBarExtraContent={leftHeader}
+                tabBarExtraContent={rightButton}
                 onChange={this.onChange}
                 activeKey={activeKey}
                 type="card"
               >
+                <TabPane tab={<span>111</span>} key="leftHeader" />
                 {
                   orders.map(orderItem => (
                     <TabPane tab={createTabTitle(orderItem.title, orderItem.type, orderItem.key, orderItem.currentTime)} key={orderItem.key}>
@@ -222,6 +251,8 @@ class PosLayout extends PureComponent {
                     </TabPane>
                   ))
                 }
+                <TabPane tab={plusButton} key="+" />
+                <TabPane tab={minusButton} key="-" />
               </Tabs>
             </div>
           </div>

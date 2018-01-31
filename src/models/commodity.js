@@ -17,22 +17,21 @@ export default {
     newTabIndex: 0,
   },
 
-subscriptions: {
+  subscriptions: {
     keyboardWatcher({ dispatch }) {
-      key('⌘+up, ctrl+up', () => { dispatch({type: 'keyBoardOperationChooseCalculator'}) });
-      if (key.isPressed("M")) alert('M key is pressed, can ya believe it!?');
+      key('⌘+up, ctrl+up', () => { dispatch({ type: 'keyBoardOperationChooseCalculator' }); });
+      if (key.isPressed('M')) alert('M key is pressed, can ya believe it!?');
     },
   },
   effects: {
     *storageButtonDOM(action, { put }) {
-      const button = action.payload
+      const button = action.payload;
     },
     *searchCustomer(_, { call }) {
       const { list } = yield call(fetchCustomerList);
     },
     *changePaymentDataAndCheck(action, { put }) {
       const paymentData = action.payload;
-      console.log(0)
       yield put({ type: 'changePaymentData', payload: paymentData });
       yield put({ type: 'checkPaymentData' });
     },
@@ -150,8 +149,8 @@ subscriptions: {
       const { orders, activeKey } = yield select(state => state.commodity);
       const activeTabKey = activeKey;
       const currentOrder = orders.filter(item => (item.key === activeKey))[0];
-      const selectedList = currentOrder.selectedList;
-      let avoidDuplicationIndex = currentOrder.avoidDuplicationIndex;
+      const { saleType, selectedList } = currentOrder;
+      let { avoidDuplicationIndex } = currentOrder;
       const selectedItem = currentOrder.content.filter(item => (item.Key === selectedKey))[0];
       let newSelectedList;
       function addNewToSelectedList(selectedItem, selectedList) {
@@ -159,6 +158,7 @@ subscriptions: {
           ...selectedItem,
           Count: 1,
           CalculateType: 'count',
+          SaleType: saleType,
         };
         return [...selectedList, newSelectedItem];
       }
@@ -212,11 +212,11 @@ subscriptions: {
     },
     *clickAddButton(action, { put, call, select }) {
       const tabType = action.payload;
+      console.log('tabType', tabType)
       const commodity = yield select(state => state.commodity);
       const count = commodity.newTabIndex + 1;
       const currentTime = moment().format('HH:mm');
       yield put({ type: 'addTab', payload: { count, tabType, currentTime } });
-      yield put({ type: 'initOperationButton' });
       // const { activeKey }= yield select(state => state.commodity)
 
       const { list } = yield call(fetchCommodityList);
@@ -239,19 +239,19 @@ subscriptions: {
     *clickRemoveButton(action, { put, select }) {
       const currentIndex = action.payload;
       const commodity = yield select(state => state.commodity);
-      const orders = commodity.orders;
+      const { orders } = commodity;
       let activeKey;
       yield put({ type: 'removeTab' });
       // case1: panes 数量大于 1 且 activeOrders 不是最后一个
-      if (orders.length > 3 && currentIndex !== orders.length - 3) {
+      if (orders.length > 1 && currentIndex !== orders.length - 1) {
         activeKey = orders[currentIndex + 1].key;
       }
       // case2: panes 数量大于 1 且 activeOrders 是最后一个
-      if (orders.length > 3 && currentIndex === orders.length - 3) {
+      if (orders.length > 1 && currentIndex === orders.length - 1) {
         activeKey = orders[currentIndex - 1].key;
       }
       // case3: panes 数量等于1, 确保始终有一个 TabPane
-      if (orders.length === 3) {
+      if (orders.length === 1) {
         activeKey = orders[currentIndex].key;
       }
       yield put({ type: 'changeActiveTabKey', payload: activeKey });
@@ -262,8 +262,9 @@ subscriptions: {
       const activeTabKey = activeKey;
       const currentOrder = orders.filter(item => (item.key === activeKey))[0];
       const { selectedList } = currentOrder;
+      const newSelectedList = selectedList.map(item => ({ ...item, SaleType: saleType }));
       yield put({ type: 'changeSaleType', payload: saleType });
-      yield put({ type: 'changeSelectedList', payload: { activeTabKey, newSelectedList: selectedList } });
+      yield put({ type: 'changeSelectedList', payload: { activeTabKey, newSelectedList } });
     },
     *clickAddBoxButton(action, { put, select }) {
       const commodity = yield select(state => state.commodity);
@@ -305,19 +306,9 @@ subscriptions: {
   },
 
   reducers: {
-    initOperationButton(state, action) {
-      const operationButton = state.operationButton.map((item) => {
-        if (item === 'add') { return { title: '+', key: '+' }; }
-        if (item === 'minus') { return { title: '-', key: '-' }; }
-        return item;
-      });
-      const orders = [...state.orders, ...operationButton];
-      return { ...state, orders };
-    },
     addTab(state, action) {
       const { count, tabType, currentTime } = action.payload;
-      const currentActiveKey = state.activeKey;
-      const goodsOrders = state.orders.filter(item => typeof item.title !== 'string');
+      const goodsOrders = state.orders;
       const orders = [
         ...goodsOrders,
         {
@@ -346,7 +337,7 @@ subscriptions: {
     removeTab(state, action) {
       const activeTabKey = state.activeKey;
       const orders = state.orders.filter(item => item.key !== activeTabKey);
-      if (orders.length > 2) {
+      if (orders.length > 0) {
         return { ...state, orders };
       }
       return state;
@@ -471,7 +462,6 @@ subscriptions: {
       return { ...state, orders: newOrders };
     },
     changePaymentData(state, action) {
-      console.log(1)
       const paymentData = action.payload;
       const { activeKey } = state;
       const newOrders = state.orders.map((item) => {

@@ -147,6 +147,12 @@
         z-index: 1000;
     }
     :global(.ant-tabs-nav) {
+      :global(.ant-tabs-tab:nth-child(2)) {
+        color: #fff;
+        border: none;
+        background: transparent;
+        width: 440px;
+      }
         height: 48px;
     }
     :global(.ant-tabs-nav-container) {
@@ -159,10 +165,10 @@
     :global(.ant-badge) {
         bottom: 2px;
     }
-    :global(.ant-tabs-extra-content) {
-        float: left !important;
-        width: 440px;
-    }
+    // :global(.ant-tabs-extra-content) {
+    //     float: left !important;
+    //     width: 440px;
+    // }
 }
 .tabsBarContent {
     padding-left: 10px;
@@ -172,6 +178,12 @@
 }
 .tabsBarContentAllocate {
     background-color: yellow;
+}
+.tabsBarContentMilkPowder {
+    background-color: #DBD5CE;
+}
+.tabsBarContentWholeSale {
+    background-color: #86B9E0;
 }
 .tabContent {
     margin-top: 48px;

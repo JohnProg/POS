@@ -1,10 +1,12 @@
 export const GOODS_DISPLAY_TYPE = {
-    CARD_LIST: Symbol(),
-    TABLE: Symbol(),
-}
+  CARD_LIST: Symbol(),
+  TABLE: Symbol(),
+};
 
 export const POS_TAB_TYPE = {
-    SALE: Symbol(),
-    ALLOCATEANDTRANSFER: Symbol(),
-    RETURNSALE: Symbol(),
-}
+  SALE: 'SALE',
+  ALLOCATEANDTRANSFER: 'ALLOCATEANDTRANSFER',
+  RETURNSALE: 'RETURNSALE',
+  MILKPOWDER: 'MILKPOWDER',
+  WHOLESALE: 'WHOLESALE',
+};
