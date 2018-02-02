@@ -16,7 +16,7 @@ class SelectedGoods extends PureComponent {
         card: true,
         selected: item.Key === activeSelectedKey,
       });
-      const unitPrice = (item.NewUnitPrice || item.NewUnitPrice === 0) ? item.NewUnitPrice : item.UnitPrice['A'][this.props.saleType];
+      const unitPrice = (item.NewUnitPrice || item.NewUnitPrice === 0) ? item.NewUnitPrice : item.RetailPrice;
       const count = item.Count;
       const discount = item.Discount;
       const price = unitPrice * count * (discount || 100) / 100;
@@ -31,7 +31,7 @@ class SelectedGoods extends PureComponent {
           onClick={() => this.handleClick(item.Key)}
         >
           <Row>
-            <Col span={20} className={styles.itemInCard}>{item.Name}</Col>
+            <Col span={20} className={styles.itemInCard}>{item.EN}</Col>
             <Col
               span={4}
               style={{ textAlign: 'right' }}
@@ -48,7 +48,7 @@ class SelectedGoods extends PureComponent {
               <Divider type="vertical" className={styles.divider} />
               <span>单价：</span>
               <span className={(item.NewUnitPrice || item.NewUnitPrice === 0) ? styles.deletedText : null}>
-                {item.UnitPrice['A'][this.props.saleType]}
+                {item.RetailPrice}
               </span>
               {
                 (item.NewUnitPrice || item.NewUnitPrice === 0) ? (
@@ -62,15 +62,18 @@ class SelectedGoods extends PureComponent {
               }
             </Col>
             <Col span={6} style={{ textAlign: 'right'}}>
-              <Tag color="#2db7f5">{ saleType }</Tag>
-            </Col>
+            {
+                (item.NewUnitPrice || item.NewUnitPrice === 0) ? (
+                  <Tag color="#f50">修改过单价</Tag>
+                )
+                  : null
+            }
             {
               discount ? (
-                <Col span={24}>
-                  {discount}% 折扣
-                                </Col>
+              <Tag color="#2db7f5">{discount}% 折扣</Tag>
               ) : null
             }
+            </Col>
           </Row>
         </Card>
       );
@@ -78,9 +81,9 @@ class SelectedGoods extends PureComponent {
     )
   )
   render() {
-    const { activeKey, orders } = this.props;
-    const currentOrder = orders.filter(item => item.key === activeKey)[0];
-    const activeSelectedKey = currentOrder && currentOrder.activeKey;
+    const { activeTabKey, orders } = this.props;
+    const currentOrder = orders.filter(item => item.key === activeTabKey)[0];
+    const activeSelectedKey = currentOrder && currentOrder.activeSelectedKey;
     const selectedList = currentOrder && currentOrder.selectedList;
     if (!selectedList || (Array.isArray(selectedList) && selectedList.length === 0)) {
       return <div>购物车是空的</div>;
@@ -104,6 +107,6 @@ class SelectedGoods extends PureComponent {
   }
 }
 export default connect(state => ({
-  activeKey: state.commodity.activeKey,
+  activeTabKey: state.commodity.activeTabKey,
   orders: state.commodity.orders,
 }))(SelectedGoods);

@@ -58,12 +58,9 @@ class PosLayout extends PureComponent {
     return { location };
   }
   componentDidMount() {
-    this.props.dispatch({
-      type: 'user/fetchCurrent',
-    });
     this.innerHeight = window.innerHeight;
     if (this.props.commodity.orders.length === 0) {
-      this.props.dispatch({ type: 'commodity/clickAddButton', payload: POS_TAB_TYPE.SALE });
+      this.props.dispatch({ type: 'commodity/clickAddTabButton', payload: POS_TAB_TYPE.SALE });
     }
   }
   getPageTitle() {
@@ -121,7 +118,7 @@ class PosLayout extends PureComponent {
   }
   onChange = (activeKey) => {
     if (activeKey === '+') {
-      this.props.dispatch({ type: 'commodity/clickAddButton', payload: POS_TAB_TYPE.SALE });
+      this.props.dispatch({ type: 'commodity/clickAddTabButton', payload: POS_TAB_TYPE.SALE });
       return;
     } else if (activeKey === '-') {
       return;
@@ -136,8 +133,8 @@ class PosLayout extends PureComponent {
   }
   render() {
     const { currentUser, collapsed, fetchingNotices, getRouteData, dispatch } = this.props;
-    const { orders, activeKey } = this.props.commodity || {};
-    const currentIndex = orders.findIndex(item => item.key === activeKey);
+    const { orders, activeTabKey } = this.props.commodity || {};
+    const currentIndex = orders.findIndex(item => item.key === activeTabKey);
     const createTabTitle = (title, type, key, currentTime) => {
       const tabsBarContentCls = cls({
         [styles.tabsBarContent]: true,
@@ -145,7 +142,6 @@ class PosLayout extends PureComponent {
         [styles.tabsBarContentMilkPowder]: type === POS_TAB_TYPE.MILKPOWDER,
         [styles.tabsBarContentWholeSale]: type === POS_TAB_TYPE.WHOLESALE,
       });
-      const activeTabKey = activeKey;
       if (typeof title === 'number') {
         const tabsBarElement = (
           <div className={tabsBarContentCls}>
@@ -199,7 +195,7 @@ class PosLayout extends PureComponent {
     const rightButtonMenu = (
       <Menu>
     <Menu.Item key="0">
-      <a onClick={() => dispatch({ type: 'commodity/clickAddButton', payload: POS_TAB_TYPE.MILKPOWDER })}>新建奶粉/生鲜订单</a>
+      <a onClick={() => dispatch({ type: 'commodity/clickAddTabButton', payload: POS_TAB_TYPE.MILKPOWDER })}>新建奶粉/生鲜订单</a>
     </Menu.Item>
     <Menu.Item key="1">
       <a onClick={() => dispatch({ type: 'commodity/clickAddButton', payload: POS_TAB_TYPE.WHOLESALE })}>新建批发订单</a>
@@ -224,7 +220,7 @@ class PosLayout extends PureComponent {
                 hideAdd
                 tabBarExtraContent={rightButton}
                 onChange={this.onChange}
-                activeKey={activeKey}
+                activeKey={activeTabKey}
                 type="card"
               >
                 <TabPane tab={<span>111</span>} key="leftHeader" />

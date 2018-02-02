@@ -130,6 +130,6 @@ class Pay extends PureComponent {
   }
 }
 export default connect(state => ({
-  order: state.commodity.orders.filter(item => item.key === state.commodity.activeKey)[0],
-  activeTabKey: state.commodity.activeKey,
+  order: state.commodity.orders.filter(item => item.key === state.commodity.activeTabKey)[0],
+  activeTabKey: state.commodity.activeTabKey,
 }))(Pay);

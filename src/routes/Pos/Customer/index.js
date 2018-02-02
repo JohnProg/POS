@@ -1,24 +1,26 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva'
-import { Tabs, Button, Badge, Row, Col, Icon, Table, Input, Divider, Form } from 'antd'
+import { Tabs, Button, Badge, Row, Col, Icon, Table, Input, Divider, Form, Select } from 'antd'
 import styles from './index.less'
 import MessageItem from './MessageItem.js'
 import { routerRedux } from 'dva/router';
+import SwitchableFormItem from '../../../components/SwitchableItem/SwitchableFormItem';
+import classNames from 'classnames'
+import TypeSelect from './TypeSelect'
 
 const { TabPane } = Tabs
 const FormItem = Form.Item;
+const { Option } = Select
+
+const cx = classNames.bind(styles)
 
 const fieldLabels = {
   name: '客户名',
-  street: '街道',
   email: '电子邮箱',
-  city: '城市',
-  phone: '电话',
-  postcode: '邮政编码',
-  barcode: '条码',
-  country: '国家',
-  taxNumber: '税号',
   address: '地址',
+  phone: '电话',
+  number: '会员卡号',
+  type: '会员类型',
 };
 
 const columns = [
@@ -35,6 +37,10 @@ const columns = [
     dataIndex: 'Number',
   },
   {
+    title: '邮箱',
+    dataIndex: 'Email',
+  },
+  {
     title: '地址',
     dataIndex: 'Address',
   },
@@ -49,18 +55,26 @@ const formItemLayout = {
   wrapperCol: { span: 16 },
 }
 
+@connect(state => ({
+  order: state.commodity.orders.filter(item => item.key === state.commodity.activeTabKey)[0],
+  activeTabKey: state.commodity.activeTabKey,
+  loading: state.commodity.commonLoading,
+  customerList: state.commodity.customerList,
+}))
 @Form.create()
-class Payment extends PureComponent {
+export default class Customer extends PureComponent {
   constructor(props) {
     super(props)
     this.state = {
       showAddCustomerForm: false,
+      showCustomerMessage: false,
+      tempRowData: {},
+      isEdit: false,
+      activeIndex: null,
     }
   }
   componentDidMount() {
-    this.props.dispatch({
-      type: 'commodity/searchCustomer',
-    })
+    this.props.dispatch({ type: 'commodity/getCustomer' })
   }
   handlePrevClick = () => {
     this.props.dispatch(routerRedux.goBack())
@@ -74,185 +88,190 @@ class Payment extends PureComponent {
     e.preventDefault();
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
-        console.log(values)
+        // console.log(values)
       }
     });
   }
-  handleAddCustomerFormSubmit = (e) => {
+  submitHandler = (e) => {
     e.preventDefault();
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
-        console.log(values)
+        this.props.dispatch({type: 'commodity/submitCustomer', payload: values})
+        this.setState({
+          showCustomerMessage: false,
+          showAddCustomerForm: false,
+          isEdit: false,
+        })
       }
     });
   }
-  toggleCustomerFormHandler = () => {
+  updateHandler = () => {
+    this.props.form.validateFieldsAndScroll((err, values) => {
+      if (!err) {
+        const newValues = { ...values, ID: this.state.tempRowData.ID }
+        this.props.dispatch({type: 'commodity/updateCustomer', payload: newValues})
+        this.setState({
+          showCustomerMessage: false,
+          isEdit: false,
+        })
+      }
+    });
+  }
+  showAddCustomerFormHandler = () => {
     this.setState({
-      showAddCustomerForm: !this.state.showAddCustomerForm,
+      showAddCustomerForm: true,
+      showCustomerMessage: false,
+      isEdit: true,
+      tempRowData: {},
+    })
+  }
+  hideAddCustomerForm = () => {
+    this.setState({
+      showAddCustomerForm: false,
+      showCustomerMessage: false,
+      isEdit: false,
+      activeIndex: null,
+    })
+    this.props.form.resetFields()
+  }
+  rowClickHandler = (record, index) => {
+    return {
+      onClick: () => {
+        if (record) {
+          this.setState({
+            tempRowData: record,
+            showCustomerMessage: true,
+            showAddCustomerForm: false,
+            isEdit: false,
+            activeIndex: index,
+          })
+        }
+      },
+    };
+  }
+  deleteCustomerHandler = () => {
+    const {ID} = this.state.tempRowData
+    if (ID) {
+    this.props.dispatch({type: 'commodity/deleteCustomer', payload: ID})
+    }
+    this.setState({
+      isEdit: false,
+      showCustomerMessage: false,
+    })
+  }
+  searchHandler = (value) => {
+    this.props.dispatch({type: 'commodity/getCustomer', payload: value})
+  }
+  toEditHandler = () => {
+    this.setState({
+      isEdit: true,
     })
   }
   render() {
-    const { dispatch, form } = this.props
+    const { dispatch, form, loading, customerList } = this.props
     const { totalPrice } = this.props.order
-    const { getFieldDecorator } = form
-    const { showAddCustomerForm } = this.state
-    const addCustomerForm = (
+    const { getFieldDecorator, resetFields, } = form
+    const { showAddCustomerForm, showCustomerMessage, tempRowData, isEdit, activeIndex, } = this.state
+    const nameRow = cx({
+      [styles.nameRow]: showCustomerMessage && !isEdit,
+    })
+    const customerForm = (
       <Form
-        onSubmit={this.handleAddCustomerFormSubmit}
+        onSubmit={this.submitHandler}
         className={styles.addCustomerForm}
+        hideRequiredMark={showCustomerMessage}
       >
-        <Row gutter={16}>
-          <Col lg={12} sm={24}>
+        <Row gutter={16} className={nameRow}>
+          <Col lg={12} sm={24} >
             <FormItem label={fieldLabels.name} { ...formItemLayout }>
               {getFieldDecorator('name', {
                 rules: [{ required: true, message: '请输入客户名' }],
+                initialValue: tempRowData['Name'],
               })(
-                <Input placeholder="名称" />
+                <SwitchableFormItem FormItemElement={Input} editable={isEdit} />
                 )}
             </FormItem>
           </Col>
-          <Col lg={12} sm={24} pull={1} className={styles.submitFormItem}>
-            <FormItem>
-              <Button shape="circle">
-                <Icon type="minus-circle" />
-              </Button>
-              <Divider type="vertical" />
-              <Button htmlType="submit" shape="circle">
-                <Icon type="save" />
-              </Button>
-            </FormItem>
-          </Col>
+          {
+            showAddCustomerForm && (
+              <Col lg={12} sm={24} pull={1} className={styles.submitFormItem}>
+                <FormItem>
+                  <Button shape="circle" onClick={() => this.hideAddCustomerForm()}>
+                    <Icon type="minus-circle" />
+                  </Button>
+                  <Divider type="vertical" />
+                  <Button htmlType="submit" shape="circle" loading={loading} >
+                    <Icon type="save" />
+                  </Button>
+                </FormItem>
+              </Col>
+            )
+          }
+          {
+            showCustomerMessage && (
+              <Col lg={12} sm={24} pull={1} className={styles.submitFormItem}>
+              {
+                isEdit ? (
+                <FormItem>
+                  <Button  shape="circle" onClick={() => this.updateHandler()}>
+                    <Icon type="save" />
+                  </Button>
+                </FormItem>
+                )
+                  :
+                  (
+                <FormItem>
+                  <Button shape="circle" onClick={() => this.toEditHandler()}>
+                    <Icon type="edit" />
+                  </Button>
+                  <Divider type="vertical" />
+                  <Button shape="circle" loading={loading} onClick={() => this.deleteCustomerHandler()} >
+                    <Icon type="delete" />
+                  </Button>
+                </FormItem>
+                )
+              }
+              </Col>
+            )
+          }
         </Row>
         <Row gutter={16}>
-          <Col lg={12} sm={24}>
-            <FormItem label={fieldLabels.street} { ...formItemLayout }>
-              {getFieldDecorator('street')(
-                <Input placeholder="街道" />
-              )}
-            </FormItem>
-          </Col>
-          <Col lg={12} sm={24}>
-            <FormItem label={fieldLabels.email} { ...formItemLayout }>
-              {getFieldDecorator('email')(
-                <Input placeholder="电子邮箱" />
-              )}
-            </FormItem>
-          </Col>
-        </Row>
-        <Row gutter={16}>
-          <Col lg={12} sm={24}>
-            <FormItem label={fieldLabels.city} { ...formItemLayout }>
-              {getFieldDecorator('city')(
-                <Input placeholder="城市" />
-              )}
+          <Col lg={12} sm={24} >
+            <FormItem label={fieldLabels.address} { ...formItemLayout }>
+              {getFieldDecorator('address', {
+                rules: [{ required: true, message: '请输入地址' }],
+                initialValue: tempRowData['Address'],
+              })(
+                <SwitchableFormItem FormItemElement={Input} editable={isEdit} />
+                )}
             </FormItem>
           </Col>
           <Col lg={12} sm={24}>
             <FormItem label={fieldLabels.phone} { ...formItemLayout }>
               {getFieldDecorator('phone', {
                 rules: [{ required: true, message: '请输入电话' }],
+                initialValue: tempRowData['Phone'],
               })(
-                <Input placeholder="电话" />
+                <SwitchableFormItem FormItemElement={Input} editable={isEdit} />
                 )}
             </FormItem>
           </Col>
-        </Row>
-        <Row gutter={16}>
-          <Col lg={12} sm={24}>
-            <FormItem label={fieldLabels.postcode} { ...formItemLayout }>
-              {getFieldDecorator('postcode')(
-                <Input placeholder="邮政编码" />
-              )}
-            </FormItem>
-          </Col>
-          <Col lg={12} sm={24}>
-            <FormItem label={fieldLabels.barcode} { ...formItemLayout }>
-              {getFieldDecorator('barcode', {
+          <Col lg={12} sm={24} >
+            <FormItem label={fieldLabels.type} { ...formItemLayout }>
+              {getFieldDecorator('type', {
+                rules: [{ required: true, message: '请选择会员类型' }],
+                initialValue: tempRowData['Type'],
               })(
-                <Input placeholder="条码" />
+                <SwitchableFormItem FormItemElement={TypeSelect} editable={isEdit} />
                 )}
             </FormItem>
           </Col>
-        </Row>
-        <Row gutter={16}>
-          <Col lg={12} sm={24}>
-            <FormItem label={fieldLabels.country} { ...formItemLayout }>
-              {getFieldDecorator('country')(
-                <Input placeholder="国家" />
-              )}
-            </FormItem>
-          </Col>
-          <Col lg={12} sm={24}>
-            <FormItem label={fieldLabels.taxNumber} { ...formItemLayout }>
-              {getFieldDecorator('taxNumber', {
-              })(
-                <Input placeholder="税号" />
-                )}
-            </FormItem>
-          </Col>
-        </Row>
-      </Form>
-    )
-    const customerMessage = (
-      <Form className={styles.customerMessageWrapper}>
-        <Row gutter={16} className={styles.nameRow}>
-          <Col lg={12} sm={24}>
-            <FormItem label={fieldLabels.name} { ...formItemLayout }>
-              {getFieldDecorator('name', {
-                initialValue: 'hahaha',
-              })(
-                <MessageItem />
-                )}
-            </FormItem>
-          </Col>
-        </Row>
-        <Row gutter={16}>
-          <Col lg={12} sm={24}>
-            <FormItem label={fieldLabels.address} { ...formItemLayout }>
-              {getFieldDecorator('address', {
-                initialValue: 'address',
-              })(
-                <MessageItem />
-                )}
-            </FormItem>
-          </Col>
-          <Col lg={12} sm={24}>
-            <FormItem label={fieldLabels.barcode} { ...formItemLayout }>
-              {getFieldDecorator('barcode', {
-                initialValue: 'barcode',
-              })(
-                <MessageItem />
-                )}
-            </FormItem>
-          </Col>
-        </Row>
-        <Row gutter={16}>
           <Col lg={12} sm={24}>
             <FormItem label={fieldLabels.email} { ...formItemLayout }>
               {getFieldDecorator('email', {
-                initialValue: 'email',
+                initialValue: tempRowData['Email'],
               })(
-                <MessageItem />
-                )}
-            </FormItem>
-          </Col>
-          <Col lg={12} sm={24}>
-            <FormItem label={fieldLabels.taxNumber} { ...formItemLayout }>
-              {getFieldDecorator('taxNumber', {
-                initialValue: 'taxNumber',
-              })(
-                <MessageItem />
-                )}
-            </FormItem>
-          </Col>
-        </Row>
-        <Row gutter={16}>
-          <Col lg={12} sm={24}>
-            <FormItem label={fieldLabels.phone} { ...formItemLayout }>
-              {getFieldDecorator('phone', {
-                initialValue: 'phone',
-              })(
-                <MessageItem />
+                <SwitchableFormItem FormItemElement={Input} editable={isEdit} />
                 )}
             </FormItem>
           </Col>
@@ -273,12 +292,12 @@ class Payment extends PureComponent {
           <Col style={{ textAlign: 'center' }}>
             <Input.Search
               placeholder="搜索客户"
-              onSearch={this.handleFormSubmit}
+              onSearch={this.searchHandler}
               style={{ width: 260 }}
             />
             <Divider type="vertical" />
-            <Button className={styles.addCustomer} onClick={this.toggleCustomerFormHandler}>
-              <Icon type="user" />
+            <Button className={styles.addCustomer} onClick={this.showAddCustomerFormHandler}>
+              <Icon type="user" onClick={() => this.showAddCustomerFormHandler()} />
               <Icon type="plus" />
             </Button>
           </Col>
@@ -289,23 +308,28 @@ class Payment extends PureComponent {
           </Col>
         </Row>
         <div className={styles.displayArea}>
-          {
-            // showAddCustomerForm && addCustomerForm
-            customerMessage
-          }
+          { (showCustomerMessage || showAddCustomerForm) && customerForm}
         </div>
         <div className={styles.customerTable}>
           <Table
             bordered
             columns={columns}
-            rowKey={record => record.Key}
+            rowKey={record => record.ID}
+            loading={loading}
+            dataSource={customerList}
+            onRow={this.rowClickHandler}
+            rowClassName={(record, index) => {
+              if (index === activeIndex) {
+                return styles.activeRow
+              }
+            }}
           />
         </div>
       </div>
     )
   }
 }
-export default connect(state => ({
-  order: state.commodity.orders.filter(item => item.key === state.commodity.activeKey)[0],
-  activeTabKey: state.commodity.activeKey
-}))(Payment)
+// export default connect(state => ({
+//   order: state.commodity.orders.filter(item => item.key === state.commodity.activeKey)[0],
+//   activeTabKey: state.commodity.activeKey
+// }))(Customer)

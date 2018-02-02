@@ -167,7 +167,7 @@ function unitPriceHandler(dispatch, buttonName, activeTabKey, selectedList, sele
 }
 
 export default function calculate(commodity, dispatch, buttonName) {
-  const activeTabKey = commodity.activeKey;
+  const { activeTabKey } = commodity;
   const currentOrder = commodity.orders.filter(item => (item.key === activeTabKey))[0];
   const { selectedList } = currentOrder;
   if (buttonName === 'customer') {
@@ -175,7 +175,7 @@ export default function calculate(commodity, dispatch, buttonName) {
     return;
   }
   if (!selectedList || (Array.isArray(selectedList) && selectedList.length === 0)) { return; }
-  const activeSelectedKey = currentOrder.activeKey;
+  const { activeSelectedKey } = currentOrder;
   const selectedItem = currentOrder.selectedList.filter(item => (item.Key === activeSelectedKey))[0];
   const calculateType = selectedItem.CalculateType;
   if (buttonName === 'count' || buttonName === 'discount' || buttonName === 'unitPrice') {
@@ -190,7 +190,10 @@ export default function calculate(commodity, dispatch, buttonName) {
     return;
   }
   if (buttonName === 'payment') {
-    dispatch(routerRedux.push('/pos/payment'));
+    const { ID='' } = currentOrder
+    const currentOrderJson = JSON.stringify(currentOrder)
+    dispatch({type: 'commodity/addOrUpdateCacheOrder', payload: { ID, order: currentOrderJson }})
+    // dispatch(routerRedux.push('/pos/payment'));
     return;
   }
   if (calculateType === 'count') {

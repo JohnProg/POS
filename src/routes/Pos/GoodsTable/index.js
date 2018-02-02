@@ -216,7 +216,7 @@ class GoodsTable extends PureComponent {
   render() {
     const { commodity, dispatch } = this.props
     const view = this.props.location && this.props.location.pathname.replace('/pos/', '')
-    const currentOrder = commodity.orders.filter(item => (item.key === commodity.activeKey))[0]
+    const currentOrder = commodity.orders.filter(item => (item.key === commodity.activeTabKey))[0]
     const { content, display } = currentOrder
     let displayTable = cx({
       [styles.trigger]: true,

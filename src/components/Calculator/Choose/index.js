@@ -44,8 +44,8 @@ class ChooseCalculator extends PureComponent {
     const { orders, activeTabKey } = this.props;
     const currentOrder = Array.isArray(orders) && orders.filter(item => (item.key === activeTabKey))[0] || {};
     const orderType = currentOrder.type;
-    const { selectedList = [], activeKey } = currentOrder;
-    const selectedItem = selectedList.filter(item => item.Key === activeKey)[0] || {};
+    const { selectedList = [], activeSelectedKey } = currentOrder;
+    const selectedItem = selectedList.filter(item => item.Key === activeSelectedKey)[0] || {};
     const calculateType = selectedItem.CalculateType;
     return (
       <div className={styles.calcWrapper}>
@@ -78,6 +78,6 @@ class ChooseCalculator extends PureComponent {
 }
 export default connect(state => ({
   commodity: state.commodity,
-  activeTabKey: state.commodity.activeKey,
+  activeTabKey: state.commodity.activeTabKey,
   orders: state.commodity.orders,
 }))(ChooseCalculator);

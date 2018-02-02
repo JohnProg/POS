@@ -1,5 +1,52 @@
 import { stringify } from 'qs';
 import request from '../utils/request';
+import { DOMAIN } from '../constant';
+
+// 客户管理的增删改查
+
+export async function submitCustomer(formValue) {
+  let options = {
+    body: `Name=${formValue.name}&Address=${formValue.address}&Email=${formValue.email}&Phone=${formValue.phone}&CardNumber=${formValue.CardNumber}&Type=${formValue.type}&Score=${formValue.score}`
+  }
+  return request(`${DOMAIN}/Member/Add`, options)
+}
+
+export async function getCustomer(params) {
+  let options = {
+    body: `Params=${params}`,
+  }
+  return request(`${DOMAIN}/Member/GetAll`, options)
+}
+
+export async function deleteCustomer(ID) {
+  let options = {
+    body: `ID=${ID}`,
+  }
+  return request(`${DOMAIN}/Member/Delete`, options)
+}
+
+export async function updateCustomer(formValue) {
+  let options = {
+    body: `ID=${formValue.ID}&Name=${formValue.name}&Address=${formValue.address}&Email=${formValue.email}&Phone=${formValue.phone}&CardNumber=${formValue.CardNumber}&Type=${formValue.type}&Score=${formValue.score}`
+  }
+  return request(`${DOMAIN}/Member/UpdateByID`, options)
+}
+
+// 获取奶粉商品列表
+
+export async function getMilkPowderGoods(params) {
+  return request(`${DOMAIN}/Product/MilkPowderShipping`)
+}
+
+// 提交缓存订单
+
+export async function addOrUpdateCacheOrder({ ID, order }) {
+  let options = {
+    body: `OrderID=${ID || ''}&Data=${order}`,
+  }
+  console.log('options', options)
+  return request(`${DOMAIN}/Order/AddOrUpdateCache`, options)
+}
 
 export async function fetchCommodityList() {
   return request('api/getCommodity');

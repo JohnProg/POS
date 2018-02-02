@@ -23,7 +23,8 @@ export default class GoodsList extends PureComponent {
   render() {
     const { commodity, dispatch } = this.props;
     const view = this.props.location && this.props.location.pathname.replace('/pos/', '');
-    const currentOrder = commodity.orders.filter(item => (item.key === commodity.activeKey))[0];
+    const { milkPowderGoodsList } = commodity
+    const currentOrder = commodity.orders.filter(item => (item.key === commodity.activeTabKey))[0];
     const { content, display, saleType, type } = currentOrder;
     const displayTable = cx({
       [styles.trigger]: true,
@@ -33,6 +34,16 @@ export default class GoodsList extends PureComponent {
       [styles.trigger]: true,
       [styles.activeTrigger]: view === 'list',
     });
+    const generateGoods = () => {
+      switch(type) {
+        case POS_TAB_TYPE.MILKPOWDER: {
+          return milkPowderGoodsList
+        }
+        default: {
+          return []
+        }
+      }
+    }
     return (
       <Layout>
         <Sider
@@ -99,7 +110,7 @@ export default class GoodsList extends PureComponent {
           <div className={styles.commodityListWrapper}>
             <div>
               {
-                Array.isArray(content) && content.map(item => <CardItem item={item} key={item.Key} dispatch={dispatch} saleType={saleType} />)
+                Array.isArray(generateGoods()) && generateGoods().map(item => <CardItem item={item} key={item.Sku} dispatch={dispatch} saleType={type === POS_TAB_TYPE.SALE ? saleType : null} />)
               }
             </div>
           </div>

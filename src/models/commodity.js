@@ -1,9 +1,23 @@
 import moment from 'moment';
 import key from 'keymaster';
-import { fetchCommodityList, fetchCustomerList } from '../services/api';
+import { fetchCommodityList, fetchCustomerList, submitCustomer, getCustomer, deleteCustomer, updateCustomer, getMilkPowderGoods, addOrUpdateCacheOrder } from '../services/api';
+import { message } from 'antd';
+import { POS_TAB_TYPE } from '../constant'
 
 function getCurrentOrder(state) {
-  return state.orders.filter(item => item.key === state.activeKey)[0];
+  return state.orders.filter(item => item.key === state.activeTabKey)[0];
+}
+
+function getCurrentContent(currentOrder, state) {
+  const { type } = currentOrder
+  switch(type) {
+    case POS_TAB_TYPE.MILKPOWDER: {
+      return state.milkPowderGoodsList
+    }
+    default: {
+      return []
+    }
+  }
 }
 
 
@@ -12,9 +26,13 @@ export default {
 
   state: {
     orders: [],
-    operationButton: ['add', 'minus'],
-    activeKey: null,
+    // operationButton: ['add', 'minus'],
+    // activeKey: null,
+    activeTabKey: null,
+    commonLoading: false,
     newTabIndex: 0,
+    customerList: [],
+    milkPowderGoodsList: [],
   },
 
   subscriptions: {
@@ -24,11 +42,113 @@ export default {
     },
   },
   effects: {
+    *addOrUpdateCacheOrder(action, { put, call }) {
+      console.log(111)
+      const { payload } = action
+      const response = yield call(addOrUpdateCacheOrder, payload)
+      console.log(response)
+    },
+    *getMilkPowderGoods(action, { put, call}) {
+      const { payload } = action
+      yield put({
+        type: 'changeCommonLoading',
+        payload: true,
+      })
+      const response = yield call(getMilkPowderGoods)
+      yield put({
+        type: 'changeCommonLoading',
+        payload: false,
+      })
+      if (response.Status) {
+        const payload = response.Result.Data
+        yield put({type: 'saveMilkPowderGoodsList', payload})
+        } else {
+          message.error('获取失败')
+        }
+    },
+    *getCustomer(action, { put, call}) {
+      const { payload } = action
+      yield put({
+        type: 'changeCommonLoading',
+        payload: true,
+      })
+      const response = yield call(getCustomer, payload)
+      yield put({
+        type: 'changeCommonLoading',
+        payload: false,
+      })
+      if (response.Status) {
+        const payload = response.Result.Data
+        yield put({type: 'saveCustomerList', payload})
+        } else {
+          message.error('获取失败')
+        }
+    },
+    *submitCustomer(action, { put, call }) {
+      const { payload } = action
+      yield put({
+        type: 'changeCommonLoading',
+        payload: true,
+      })
+      try {
+      const response = yield call(submitCustomer, payload)
+      if (response.Status) {
+         message.success('提交成功')
+        } else {
+          message.error('提交失败')
+        }
+        yield put({type: 'getCustomer'})
+      } catch (e) {
+      }
+      yield put({
+        type: 'changeCommonLoading',
+        payload: false,
+      })
+    },
+    *deleteCustomer(action, { put, call }) {
+      const { payload } = action
+      yield put({
+        type: 'changeCommonLoading',
+        payload: true,
+      })
+      try {
+      const response = yield call(deleteCustomer, payload)
+      if (response.Status) {
+         message.success('删除成功')
+        } else {
+          message.error('删除失败')
+        }
+        yield put({type: 'getCustomer'})
+      } catch (e) {
+      }
+      yield put({
+        type: 'changeCommonLoading',
+        payload: false,
+      })
+    },
+    *updateCustomer(action, { put, call }) {
+      const { payload } = action
+      yield put({
+        type: 'changeCommonLoading',
+        payload: true,
+      })
+      try {
+      const response = yield call(updateCustomer, payload)
+      if (response.Status) {
+         message.success('更新成功')
+        } else {
+          message.error('更新失败')
+        }
+        yield put({type: 'getCustomer'})
+      } catch (e) {
+      }
+      yield put({
+        type: 'changeCommonLoading',
+        payload: false,
+      })
+    },
     *storageButtonDOM(action, { put }) {
       const button = action.payload;
-    },
-    *searchCustomer(_, { call }) {
-      const { list } = yield call(fetchCustomerList);
     },
     *changePaymentDataAndCheck(action, { put }) {
       const paymentData = action.payload;
@@ -38,7 +158,7 @@ export default {
     *clickGoodsItemTrue(action, { put, select }) {
       const commodity = yield select(state => state.commodity);
       const currentOrder = getCurrentOrder(commodity);
-      const { content } = currentOrder;
+      const content = getCurrentContent(currentOrder, commodity)
       const key = action.payload;
       const newContent = content.map((item) => {
         if (item.Key === key) {
@@ -51,10 +171,10 @@ export default {
     *clickGoodsItem(action, { put, select }) {
       const commodity = yield select(state => state.commodity);
       const currentOrder = getCurrentOrder(commodity);
-      const { content } = currentOrder;
+      const content = getCurrentContent(currentOrder, commodity)
       const key = action.payload;
       const newContent = content.map((item) => {
-        if (item.Key === key) {
+        if (item.Sku === key) {
           return { ...item, dataClicked: null };
         }
         return item;
@@ -146,19 +266,19 @@ export default {
     },
     *addToSelectedList(action, { put, select }) {
       const selectedKey = action.payload;
-      const { orders, activeKey } = yield select(state => state.commodity);
-      const activeTabKey = activeKey;
-      const currentOrder = orders.filter(item => (item.key === activeKey))[0];
-      const { saleType, selectedList } = currentOrder;
+      const commodity = yield select(state => state.commodity);
+      const { orders, activeTabKey } = commodity
+      const currentOrder = getCurrentOrder(commodity);
+      const currentGoodsList = getCurrentContent(currentOrder, commodity)
+      const { selectedList } = currentOrder;
       let { avoidDuplicationIndex } = currentOrder;
-      const selectedItem = currentOrder.content.filter(item => (item.Key === selectedKey))[0];
+      const selectedItem = currentGoodsList.filter(item => (item.Key === selectedKey))[0];
       let newSelectedList;
       function addNewToSelectedList(selectedItem, selectedList) {
         const newSelectedItem = {
           ...selectedItem,
           Count: 1,
           CalculateType: 'count',
-          SaleType: saleType,
         };
         return [...selectedList, newSelectedItem];
       }
@@ -195,13 +315,12 @@ export default {
     *changeSelectedList(action, { put, select }) {
       const { activeTabKey, newSelectedList } = action.payload;
       yield put({ type: 'changeSelectedItem', payload: { activeTabKey, newSelectedList } });
-      const { orders, activeKey } = yield select(state => state.commodity);
+      const { orders } = yield select(state => state.commodity);
       const currentOrder = orders.filter(item => (item.key === activeTabKey))[0];
-      const { saleType } = currentOrder;
       const selectedList = currentOrder.selectedList;
       let goodsPrice = 0;
       selectedList.forEach((item) => {
-        const unitPrice = (item.NewUnitPrice || item.NewUnitPrice === 0) ? item.NewUnitPrice : item.UnitPrice.A[saleType];
+        const unitPrice = (item.NewUnitPrice || item.NewUnitPrice === 0) ? item.NewUnitPrice : item.RetailPrice
         const count = item.Count;
         const discount = item.Discount;
         const price = unitPrice * count * (discount || 100) / 100;
@@ -210,16 +329,19 @@ export default {
       yield put({ type: 'changeGoodsPrice', payload: goodsPrice });
       yield put({ type: 'sumTotalPrice' });
     },
-    *clickAddButton(action, { put, call, select }) {
+    *clickAddTabButton(action, { put, call, select }) {
       const tabType = action.payload;
-      console.log('tabType', tabType)
       const commodity = yield select(state => state.commodity);
       const count = commodity.newTabIndex + 1;
       const currentTime = moment().format('HH:mm');
-      yield put({ type: 'addTab', payload: { count, tabType, currentTime } });
+      const createTime = moment().format('YYYY-MM-DD HH:mm')
+      yield put({ type: 'addTab', payload: { count, tabType, currentTime, createTime } });
       // const { activeKey }= yield select(state => state.commodity)
+      if (tabType === POS_TAB_TYPE.MILKPOWDER) {
+        yield put({type: 'getMilkPowderGoods'})
+      }
 
-      const { list } = yield call(fetchCommodityList);
+      // const { list } = yield call(fetchCommodityList);
       // const list = [
       //   { Name: '苹果', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 1 },
       //   { Name: '梨子', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 2 },
@@ -234,33 +356,32 @@ export default {
       //   { Name: '鲅鱼', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 11 },
       //   { Name: '大虾', UnitPrice: { A: { Local: 300, Express: 288 } }, Image: 'http://dummyimage.com/100x100', Key: 12 },
       // ];
-      yield put({ type: 'saveCommodityList', payload: list });
+      // yield put({ type: 'saveCommodityList', payload: list });
     },
     *clickRemoveButton(action, { put, select }) {
       const currentIndex = action.payload;
       const commodity = yield select(state => state.commodity);
       const { orders } = commodity;
-      let activeKey;
+      let activeTabKey;
       yield put({ type: 'removeTab' });
       // case1: panes 数量大于 1 且 activeOrders 不是最后一个
       if (orders.length > 1 && currentIndex !== orders.length - 1) {
-        activeKey = orders[currentIndex + 1].key;
+        activeTabKey = orders[currentIndex + 1].key;
       }
       // case2: panes 数量大于 1 且 activeOrders 是最后一个
       if (orders.length > 1 && currentIndex === orders.length - 1) {
-        activeKey = orders[currentIndex - 1].key;
+        activeTabKey = orders[currentIndex - 1].key;
       }
       // case3: panes 数量等于1, 确保始终有一个 TabPane
       if (orders.length === 1) {
-        activeKey = orders[currentIndex].key;
+        activeTabKey = orders[currentIndex].key;
       }
-      yield put({ type: 'changeActiveTabKey', payload: activeKey });
+      yield put({ type: 'changeActiveTabKey', payload: activeTabKey });
     },
     *clickChangeSaleTypeButton(action, { put, select }) {
       const saleType = action.payload;
-      const { orders, activeKey } = yield select(state => state.commodity);
-      const activeTabKey = activeKey;
-      const currentOrder = orders.filter(item => (item.key === activeKey))[0];
+      const { orders, activeTabKey } = yield select(state => state.commodity);
+      const currentOrder = orders.filter(item => (item.key === activeTabKey))[0];
       const { selectedList } = currentOrder;
       const newSelectedList = selectedList.map(item => ({ ...item, SaleType: saleType }));
       yield put({ type: 'changeSaleType', payload: saleType });
@@ -307,7 +428,7 @@ export default {
 
   reducers: {
     addTab(state, action) {
-      const { count, tabType, currentTime } = action.payload;
+      const { count, tabType, currentTime, createTime } = action.payload;
       const goodsOrders = state.orders;
       const orders = [
         ...goodsOrders,
@@ -315,7 +436,8 @@ export default {
           title: count,
           key: `orders-${count}`,
           selectedList: [],
-          activeKey: null,
+          // activeKey: null,
+          activeSelectedKey: null,
           paymentDataIndex: 0,
           paymentData: [],
           activePaymentDataIndex: null,
@@ -328,14 +450,18 @@ export default {
           changeMoney: 0,
           type: tabType,
           currentTime,
-          saleType: 'Local',
+          createTime,
+          saleType: tabType === POS_TAB_TYPE.SALE ? 'Local' : null,
+          customer: null,
+          avoidDuplicationIndex: 0,
+          phase: 'choose',
         },
       ];
-      const activeKey = `orders-${count}`;
-      return { ...state, orders, activeKey, newTabIndex: count };
+      const activeTabKey = `orders-${count}`;
+      return { ...state, orders, activeTabKey, newTabIndex: count };
     },
     removeTab(state, action) {
-      const activeTabKey = state.activeKey;
+      const { activeTabKey } = state;
       const orders = state.orders.filter(item => item.key !== activeTabKey);
       if (orders.length > 0) {
         return { ...state, orders };
@@ -343,44 +469,36 @@ export default {
       return state;
     },
     changeActiveTabKey(state, action) {
-      const activeKey = action.payload;
-      return { ...state, activeKey };
-    },
-    saveCommodityList(state, action) {
-      const activeTabKey = state.activeKey;
-      const list = action.payload || [];
-      const newOrders = state.orders.map((item) => {
-        if (item.key && item.key === activeTabKey) {
-          return { ...item, content: list, avoidDuplicationIndex: 0, phase: 'choose' };
-        }
-        return item;
-      });
-      return { ...state, orders: newOrders };
+      const activeTabKey = action.payload;
+      return { ...state, activeTabKey };
     },
     changeCommodityContent(state, action) {
-      const activeTabKey = state.activeKey;
+      const { activeTabKey } = state;
+      const currentOrder = state.orders.filter(item => (item.key === activeTabKey))[0];
+      const { type } = currentOrder
       const content = action.payload || [];
-      const newOrders = state.orders.map((item) => {
-        if (item.key && item.key === activeTabKey) {
-          return { ...item, content };
+      switch(type) {
+        case POS_TAB_TYPE.MILKPOWDER: {
+          return { ...state, milkPowderGoodsList: content }
         }
-        return item;
-      });
-      return { ...state, orders: newOrders };
+        default: {
+          return state
+        }
+      }
     },
     toggleSelectedGoods(state, action) {
       const activeSelectedKey = action.payload;
-      const activeTabKey = state.activeKey;
+      const { activeTabKey } = state;
       const newOrders = state.orders.map((item) => {
         if (item.key && item.key === activeTabKey) {
-          return { ...item, activeKey: activeSelectedKey };
+          return { ...item, activeSelectedKey };
         } return item;
       });
       return { ...state, orders: newOrders };
     },
     changeGoodsPrice(state, action) {
       const goodsPrice = action.payload;
-      const activeTabKey = state.activeKey;
+      const { activeTabKey } = state;
       const newOrders = state.orders.map((item) => {
         if (item.key && item.key === activeTabKey) {
           return { ...item, goodsPrice };
@@ -390,10 +508,10 @@ export default {
     },
     changeCalculateType(state, action) {
       const calculateType = action.payload;
-      const activeTabKey = state.activeKey;
+      const { activeTabKey } = state
       const currentOrder = state.orders.filter(item => (item.key === activeTabKey))[0];
       const selectedList = currentOrder.selectedList;
-      const activeSelectedKey = currentOrder.activeKey;
+      const { activeSelectedKey } = currentOrder;
       const newSelectedList = selectedList.map((item) => {
         if (item.Key === activeSelectedKey) {
           return { ...item, CalculateType: calculateType, CacheCount: null, CacheDiscount: null, CacheUnitPrice: null };
@@ -419,11 +537,11 @@ export default {
       return { ...state, orders: newOrders };
     },
     changeActiveSelectedKey(state, action) {
-      const tempActiveKey = action.payload;
-      const activeTabKey = state.activeKey;
+      const activeSelectedKey = action.payload;
+      const { activeTabKey } = state;
       const newOrders = state.orders.map((item) => {
         if (item.key && item.key === activeTabKey) {
-          return { ...item, activeKey: tempActiveKey };
+          return { ...item, activeSelectedKey };
         }
         return item;
       });
@@ -431,7 +549,7 @@ export default {
     },
     changeAvoidDuplicationIndex(state, action) {
       const avoidDuplicationIndex = action.payload;
-      const activeTabKey = state.activeKey;
+      const { activeTabKey } = state
       const newOrders = state.orders.map((item) => {
         if (item.key && item.key === activeTabKey) {
           return { ...item, avoidDuplicationIndex };
@@ -452,9 +570,9 @@ export default {
     },
     changeSaleType(state, action) {
       const saleType = action.payload;
-      const { activeKey } = state;
+      const { activeTabKey } = state;
       const newOrders = state.orders.map((item) => {
-        if (item.key === activeKey) {
+        if (item.key === activeTabKey) {
           return { ...item, saleType };
         }
         return item;
@@ -463,9 +581,9 @@ export default {
     },
     changePaymentData(state, action) {
       const paymentData = action.payload;
-      const { activeKey } = state;
+      const { activeTabKey } = state;
       const newOrders = state.orders.map((item) => {
-        if (item.key === activeKey) {
+        if (item.key === activeTabKey) {
           return { ...item, paymentData };
         }
         return item;
@@ -474,10 +592,10 @@ export default {
     },
     changePaymentDataIndex(state, action) {
       let paymentDataIndex = action.payload;
-      const { activeKey } = state;
+      const { activeTabKey } = state;
       paymentDataIndex += 1;
       const newOrders = state.orders.map((item) => {
-        if (item.key === activeKey) {
+        if (item.key === activeTabKey) {
           return { ...item, paymentDataIndex };
         }
         return item;
@@ -486,10 +604,10 @@ export default {
     },
     changeExpressDataIndex(state, action) {
       let expressDataIndex = action.payload;
-      const { activeKey } = state;
+      const { activeTabKey } = state;
       expressDataIndex += 1;
       const newOrders = state.orders.map((item) => {
-        if (item.key === activeKey) {
+        if (item.key === activeTabKey) {
           return { ...item, expressDataIndex };
         }
         return item;
@@ -498,9 +616,9 @@ export default {
     },
     changeExpressData(state, action) {
       const expressData = action.payload;
-      const { activeKey } = state;
+      const { activeTabKey } = state;
       const newOrders = state.orders.map((item) => {
-        if (item.key === activeKey) {
+        if (item.key === activeTabKey) {
           return { ...item, expressData };
         }
         return item;
@@ -509,9 +627,9 @@ export default {
     },
     changeExpressCost(state, action) {
       const expressCost = action.payload;
-      const { activeKey } = state;
+      const { activeTabKey } = state;
       const newOrders = state.orders.map((item) => {
-        if (item.key === activeKey) {
+        if (item.key === activeTabKey) {
           return { ...item, expressCost };
         }
         return item;
@@ -520,9 +638,9 @@ export default {
     },
     changeTotalPrice(state, action) {
       const totalPrice = action.payload;
-      const { activeKey } = state;
+      const { activeTabKey } = state;
       const newOrders = state.orders.map((item) => {
-        if (item.key === activeKey) {
+        if (item.key === activeTabKey) {
           return { ...item, totalPrice };
         }
         return item;
@@ -531,9 +649,9 @@ export default {
     },
     changeChangeMoney(state, action) {
       const changeMoney = action.payload;
-      const { activeKey } = state;
+      const { activeTabKey } = state;
       const newOrders = state.orders.map((item) => {
-        if (item.key === activeKey) {
+        if (item.key === activeTabKey) {
           return { ...item, changeMoney };
         }
         return item;
@@ -542,9 +660,9 @@ export default {
     },
     changeRealMoney(state, action) {
       const realMoney = action.payload;
-      const { activeKey } = state;
+      const { activeTabKey } = state;
       const newOrders = state.orders.map((item) => {
-        if (item.key === activeKey) {
+        if (item.key === activeTabKey) {
           return { ...item, realMoney };
         }
         return item;
@@ -553,7 +671,7 @@ export default {
     },
     changeActivePaymentDataIndex(state, action) {
       let activePaymentDataIndex = action.payload;
-      const { activeKey } = state;
+      const { activeTabKey } = state;
       const currentOrder = getCurrentOrder(state);
       const { paymentData } = currentOrder;
       if (paymentData.length === 0) {
@@ -562,12 +680,25 @@ export default {
         activePaymentDataIndex = 0;
       }
       const newOrders = state.orders.map((item) => {
-        if (item.key === activeKey) {
+        if (item.key === activeTabKey) {
           return { ...item, activePaymentDataIndex };
         }
         return item;
       });
       return { ...state, orders: newOrders };
+    },
+    changeCommonLoading(state, action) {
+      const commonLoading = action.payload
+      return { ...state, commonLoading }
+    },
+    saveCustomerList(state, action) {
+      const customerList = action.payload
+      return { ...state, customerList }
+    },
+    saveMilkPowderGoodsList(state, action) {
+      const { payload } = action
+      const milkPowderGoodsList = payload.map(item => ({ ...item, Key: item.Sku }))
+      return { ...state, milkPowderGoodsList, }
     },
   },
 };

@@ -7,7 +7,7 @@ import Pay from './Pay';
 import ExpressHandler from '../ExpressHandler';
 import { POS_TAB_TYPE } from '../../../constant';
 import Print from 'rc-print';
-import MilkPowderHandler from './MilkPowderHandler';
+import MilkPowderHandler from './MilkPowderHandler/';
 import SaleHandler from './SaleHandler';
 import DescriptionList from '../../../components/DescriptionList';
 // import WareHouse from './WareHouse';
@@ -17,8 +17,8 @@ const RadioGroup = Radio.Group;
 const { Description } = DescriptionList
 
 @connect(state => ({
-  order: state.commodity.orders.filter(item => item.key === state.commodity.activeKey)[0],
-  activeTabKey: state.commodity.activeKey,
+  order: state.commodity.orders.filter(item => item.key === state.commodity.activeTabKey)[0],
+  activeTabKey: state.commodity.activeTabKey,
 }))
 export default class Payment extends PureComponent {
   constructor(props) {
@@ -34,9 +34,6 @@ export default class Payment extends PureComponent {
     this.setState({
       isConfirmEnable: bool,
     });
-  }
-  confirmHandler = () => {
-    // if (POS_TAB_TYPE) ===
   }
   render() {
     const { dispatch } = this.props;

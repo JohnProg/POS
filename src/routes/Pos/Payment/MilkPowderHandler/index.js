@@ -1,7 +1,8 @@
 import React, { PureComponent } from 'react';
 import { Card, Form, Input, Row, Col, Cascader, } from 'antd'
 import { connect } from 'dva';
-import cascaderAddressOptions from '../../../utils/cascader-address-options';
+import cascaderAddressOptions from '../../../../utils/cascader-address-options';
+import TableForm from './TableForm'
 
 
 const fieldLabels = {
@@ -16,20 +17,37 @@ const fieldLabels = {
 
 
 @connect(state => ({
-  order: state.commodity.orders.filter(item => item.key === state.commodity.activeKey)[0],
-  activeTabKey: state.commodity.activeKey,
+  order: state.commodity.orders.filter(item => item.key === state.commodity.activeTabKey)[0],
+  activeTabKey: state.commodity.activeTabKey,
 }))
 
 
 
 class MilkPowderHandler extends PureComponent {
   render() {
-
-    const { form } = this.props;
+    const { form, order } = this.props;
     const { getFieldDecorator, validateFieldsAndScroll, getFieldsError } = form;
-
+    const { selectedList } = order || []
+    const waybillRequiredFiltered = selectedList.filter(item => item.Sku.includes('CGF') || item.Sku.includes('CGF'))
+    const waybillUnRequiredFiltered = selectedList.filter(item => !item.Sku.includes('CGF') && !item.Sku.includes('CGF'))
+    let selectedListForWaybill = []
+    waybillRequiredFiltered.forEach(item => {
+      for (let i=0; i<item.Count; i++) {
+        selectedListForWaybill.push({
+          ...item, Key: `${item.Sku}-${i}`, Count: 1
+        })
+      }
+    })
+    selectedListForWaybill = [ ...selectedListForWaybill, ...waybillUnRequiredFiltered ]
     return (
       <div>
+        <Card title="抓取运单号" bordered={false} style={{marginBottom: 24}}>
+        {getFieldDecorator('waybill', {
+          initialValue: selectedListForWaybill,
+        })(
+          <TableForm />
+        )}
+        </Card>
         <Card title="奶粉下单地址"  bordered={false} style={{marginBottom: 24}}>
           <Form layout="vertical">
             <Row gutter={16}>
