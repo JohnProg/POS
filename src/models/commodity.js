@@ -329,7 +329,7 @@ export default {
       yield put({ type: 'changeGoodsPrice', payload: goodsPrice });
       yield put({ type: 'sumTotalPrice' });
     },
-    *clickAddTabButton(action, { put, call, select }) {
+    *clickAddTabButton(action, { put, select }) {
       const tabType = action.payload;
       const commodity = yield select(state => state.commodity);
       const count = commodity.newTabIndex + 1;

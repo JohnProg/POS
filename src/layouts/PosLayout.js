@@ -204,7 +204,7 @@ class PosLayout extends PureComponent {
     );
     const rightButton = (
       <Dropdown overlay={rightButtonMenu} trigger={['click']}>
-        <Button icon="left"j />
+        <Button icon="left" />
       </Dropdown>
     );
 
