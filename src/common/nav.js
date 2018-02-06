@@ -14,26 +14,27 @@ export const getNavData = app => [
     layout: 'PosLayout',
     name: 'POS系统',
     path: '/pos',
+    icon: 'shopping-cart',
     children: [
       {
         name: 'Point of Sale',
         icon: 'shopping-cart',
-        path: 'pos/list',
+        path: 'pos',
         // component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/Choose')),
         component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/GoodsList')),
       },
-      {
-        path: 'pos/table',
-        component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/GoodsTable')),
-      },
-      {
-        path: 'pos/payment',
-        component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/Payment')),
-      },
-      {
-        path: 'pos/customer',
-        component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/Customer')),
-      },
+    //   {
+    //     path: 'pos/table',
+    //     component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/GoodsTable')),
+    //   },
+    //   {
+    //     path: 'pos/payment',
+    //     component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/Payment')),
+    //   },
+    //   {
+    //     path: 'pos/customer',
+    //     component: dynamicWrapper(app, ['commodity'], () => import('../routes/Pos/Customer')),
+    //   },
       // children: [
       //     {
       //         path: 'list',

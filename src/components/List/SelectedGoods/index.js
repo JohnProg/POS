@@ -6,6 +6,12 @@ import styles from './index.less';
 
 const cx = classNames.bind(styles);
 
+const saleTypeLabelMapping = {
+  1: '本地',
+  2: '邮寄',
+  3: '代发',
+}
+
 class SelectedGoods extends PureComponent {
   handleClick = (key) => {
     this.props.dispatch({ type: 'commodity/toggleSelectedGoods', payload: key });
@@ -62,6 +68,12 @@ class SelectedGoods extends PureComponent {
               }
             </Col>
             <Col span={6} style={{ textAlign: 'right'}}>
+            {
+                (item.SaleType || item.SaleType === 0) ? (
+                  <Tag color="#87d068">{saleTypeLabelMapping[saleType]}</Tag>
+                )
+                  : null
+            }
             {
                 (item.NewUnitPrice || item.NewUnitPrice === 0) ? (
                   <Tag color="#f50">修改过单价</Tag>

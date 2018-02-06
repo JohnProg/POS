@@ -1,5 +1,7 @@
 @border-color: #BFBFBF;
+@bg-color: #E2E2E2;
 .calcWrapper {
+  background-color: @border-color;
 }
 .numPad {
     margin-left: auto;
@@ -19,6 +21,7 @@
         border-radius: 0;
         position: relative;
         overflow: hidden;
+        background-color: @bg-color;
         &:after {
             content: '';
             position: absolute;
@@ -37,10 +40,12 @@
         }
         &:hover {
             color: initial;
+            background-color: @bg-color;
             border-color: @border-color;
         }
         &:focus {
             color: initial;
+            background-color: @bg-color;
             border-color: @border-color;
         }
         &[datatype="string"] {

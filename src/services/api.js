@@ -38,14 +38,44 @@ export async function getMilkPowderGoods(params) {
   return request(`${DOMAIN}/Product/MilkPowderShipping`)
 }
 
+// 获取门店销售商品列表
+
+export async function getStoreSaleGoods(params) {
+  return request(`${DOMAIN}/Product/StoreSale`)
+}
+
+// 获取门店批发商品列表
+
+export async function getStoreWholeSaleGoods(params) {
+  return request(`${DOMAIN}/Product/StoreWholeSale`)
+}
+
+
 // 提交缓存订单
 
 export async function addOrUpdateCacheOrder({ ID, order }) {
   let options = {
     body: `OrderID=${ID || ''}&Data=${order}`,
   }
-  console.log('options', options)
   return request(`${DOMAIN}/Order/AddOrUpdateCache`, options)
+}
+
+// 奶粉订单抓取订单号
+
+export async function fetchWaybill(dataJson) {
+  let options = {
+    body: `Data=${dataJson}`,
+  }
+  return request(`${DOMAIN}/Order/GetInvoiceNo`, options)
+}
+
+// 提交奶粉订单
+
+export async function submitOrder({ orderID, dataJson }) {
+  let options = {
+    body: `OrderID=${orderID}&Data=${dataJson}`,
+  }
+  return request(`${DOMAIN}/Order/Commit`, options)
 }
 
 export async function fetchCommodityList() {

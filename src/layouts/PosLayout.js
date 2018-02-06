@@ -13,9 +13,13 @@ import NotFound from '../routes/Exception/404';
 import styles from './PosLayout.less';
 import ChooseCalculator from '../components/Calculator/Choose/';
 import SelectedGoods from '../components/List/SelectedGoods/';
-import { POS_TAB_TYPE } from '../constant';
+import { POS_TAB_TYPE, POS_PHASE, } from '../constant';
 import classnames from 'classnames';
 import { routerRedux } from 'dva/router';
+import GoodsList from '../routes/Pos/GoodsList';
+import GoodsTable from '../routes/Pos/GoodsTable';
+import Payment from '../routes/Pos/Payment';
+import Customer from '../routes/Pos/Customer';
 
 const cls = classnames.bind(styles);
 
@@ -60,7 +64,7 @@ class PosLayout extends PureComponent {
   componentDidMount() {
     this.innerHeight = window.innerHeight;
     if (this.props.commodity.orders.length === 0) {
-      this.props.dispatch({ type: 'commodity/clickAddTabButton', payload: POS_TAB_TYPE.SALE });
+      this.props.dispatch({ type: 'commodity/clickAddTabButton', payload: POS_TAB_TYPE.STORESALE });
     }
   }
   getPageTitle() {
@@ -118,7 +122,7 @@ class PosLayout extends PureComponent {
   }
   onChange = (activeKey) => {
     if (activeKey === '+') {
-      this.props.dispatch({ type: 'commodity/clickAddTabButton', payload: POS_TAB_TYPE.SALE });
+      this.props.dispatch({ type: 'commodity/clickAddTabButton', payload: POS_TAB_TYPE.STORESALE });
       return;
     } else if (activeKey === '-') {
       return;
@@ -126,7 +130,7 @@ class PosLayout extends PureComponent {
       this.props.dispatch(routerRedux.push('/'));
       return;
     }
-    this.props.dispatch({ type: 'commodity/changeActiveTabKey', payload: activeKey });
+    this.props.dispatch({ type: 'commodity/clickTab', payload: activeKey });
   }
   remove = (currentIndex) => {
     this.props.dispatch({ type: 'commodity/clickRemoveButton', payload: currentIndex });
@@ -135,6 +139,7 @@ class PosLayout extends PureComponent {
     const { currentUser, collapsed, fetchingNotices, getRouteData, dispatch } = this.props;
     const { orders, activeTabKey } = this.props.commodity || {};
     const currentIndex = orders.findIndex(item => item.key === activeTabKey);
+    const currentOrder = orders.filter(item => item.key === activeTabKey)[0]
     const createTabTitle = (title, type, key, currentTime) => {
       const tabsBarContentCls = cls({
         [styles.tabsBarContent]: true,
@@ -198,7 +203,7 @@ class PosLayout extends PureComponent {
       <a onClick={() => dispatch({ type: 'commodity/clickAddTabButton', payload: POS_TAB_TYPE.MILKPOWDER })}>新建奶粉/生鲜订单</a>
     </Menu.Item>
     <Menu.Item key="1">
-      <a onClick={() => dispatch({ type: 'commodity/clickAddButton', payload: POS_TAB_TYPE.WHOLESALE })}>新建批发订单</a>
+      <a onClick={() => dispatch({ type: 'commodity/clickAddTabButton', payload: POS_TAB_TYPE.WHOLESALE })}>新建批发订单</a>
     </Menu.Item>
   </Menu>
     );
@@ -207,6 +212,25 @@ class PosLayout extends PureComponent {
         <Button icon="left" />
       </Dropdown>
     );
+    const generatePosLayoutContent = () => {
+      switch(currentOrder.targetPhase) {
+        case POS_PHASE.LIST: {
+          return <GoodsList />
+        }
+        case POS_PHASE.TABLE: {
+          return <GoodsTable />
+        }
+        case POS_PHASE.PAY: {
+          return <Payment />
+        }
+        case POS_PHASE.CUSTOMER: {
+          return <Customer />
+        }
+        default: {
+          return null
+        }
+      }
+    }
 
 
     const layout = (
@@ -228,7 +252,10 @@ class PosLayout extends PureComponent {
                   orders.map(orderItem => (
                     <TabPane tab={createTabTitle(orderItem.title, orderItem.type, orderItem.key, orderItem.currentTime)} key={orderItem.key}>
                       <div className={styles.tabContent}>
-                        <Switch>
+                      {
+                      generatePosLayoutContent()
+                      }
+                        {/* <Switch>
                           {
                             getRouteData('PosLayout').map(item =>
                               (
@@ -242,7 +269,7 @@ class PosLayout extends PureComponent {
                             )
                           }
                           <Route component={NotFound} />
-                        </Switch>
+                        </Switch> */}
                       </div>
                     </TabPane>
                   ))

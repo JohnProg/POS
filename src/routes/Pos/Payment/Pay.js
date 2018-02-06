@@ -85,7 +85,7 @@ class Pay extends PureComponent {
               ghost
               type="primary"
               name={item.name}
-              calue={item.value}
+              value={item.value}
               clickHandler={this.clickHandler}
               key={item.value}
             />))

@@ -203,6 +203,14 @@ class CashStatistics extends PureComponent {
   componentWillUnmount() {
     window.removeEventListener('resize', this.resizeFooterToolbar);
   }
+   resizeFooterToolbar = () => {
+    const sider = document.querySelectorAll('.ant-layout-sider')[0];
+    const width = `calc(100% - ${sider.style.width})`;
+    if (this.state.width !== width) {
+      this.setState({ width });
+    }
+  }
+
 
   calcTotalCash = () => {
     const cashValues = this.props.form.getFieldsValue(Object.values(cashFieldsNameMap));

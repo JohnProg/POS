@@ -1,5 +1,6 @@
 import isNumber from '../../isNumber';
 import { routerRedux } from 'dva/router';
+import { POS_PHASE } from '../../../../constant'
 
 function generateNewSelectedList(activeSelectedKey, selectedList, cache, number, type) {
   return selectedList.map((item) => {
@@ -169,7 +170,7 @@ function unitPriceHandler(dispatch, buttonName, activeTabKey, selectedList, sele
 export default function calculate(commodity, dispatch, buttonName) {
   const { activeTabKey } = commodity;
   const currentOrder = commodity.orders.filter(item => (item.key === activeTabKey))[0];
-  const { selectedList } = currentOrder;
+  const { selectedList, lastPhase } = currentOrder;
   if (buttonName === 'customer') {
     dispatch(routerRedux.push('/pos/customer'));
     return;
@@ -193,6 +194,8 @@ export default function calculate(commodity, dispatch, buttonName) {
     const { ID='' } = currentOrder
     const currentOrderJson = JSON.stringify(currentOrder)
     dispatch({type: 'commodity/addOrUpdateCacheOrder', payload: { ID, order: currentOrderJson }})
+    const targetPhase = POS_PHASE.PAY
+    dispatch({type: 'commodity/changePosPhase', payload: { activeTabKey, lastPhase, targetPhase }})
     // dispatch(routerRedux.push('/pos/payment'));
     return;
   }

@@ -2,19 +2,20 @@ import React, { PureComponent } from 'react';
 import { Card, Form, Input, Row, Col, Cascader, Button, Icon, Popover } from 'antd'
 import { connect } from 'dva';
 import TableForm from './TableForm';
-import CascaderInFormItem from './CascaderInFormItem';
+import CascaderInFormItem from '../MilkPowderHandler/CascaderInFormItem';
 import FooterToolbar from '../../../../components/FooterToolbar';
 import styles from './index.less'
 
 
 const fieldLabels = {
-  senderName: '寄件人姓名',
-  senderPhoneNumber: '寄件人号码',
-  receiverName: '收件人姓名',
-  receiverPhoneNumber: '收件人号码',
-  receiverIDNumber: '收件人身份证号',
-  receiverAddress: '收件人地址',
-  receiverDetailedAddress: '收件人详细地址（具体到门牌号）',
+  shippingData: '代发包裹信息',
+  SenderName: '寄件人姓名',
+  SenderPhoneNumber: '寄件人号码',
+  ReceiverName: '收件人姓名',
+  ReceiverPhoneNumber: '收件人号码',
+  ReceiverIDNumber: '收件人身份证号',
+  ReceiverAddress: '收件人地址',
+  ReceiverDetailedAddress: '收件人详细地址（具体到门牌号）',
 };
 
 
@@ -26,14 +27,14 @@ const fieldLabels = {
 
 @Form.create()
 
-export default class MilkPowderHandler extends PureComponent {
-  checkWaybill = (rule, value, callback) => {
-    const waybillRequiredFiltered = value.filter(item => item.Sku.includes('CGF') || item.Sku.includes('CGF'))
-    if (waybillRequiredFiltered.find(item => (item.InvoiceNo)) || waybillRequiredFiltered.length === 0) {
+export default class ShippingHandler extends PureComponent {
+  checkShippingData = (rule, value, callback) => {
+    const { Name } = value[0]
+    if (Name) {
       callback()
       return
     }
-    callback('SKU 包含 CGF 或 YDF 的奶粉必须抓取订单号')
+    callback('快递公司是必填的')
   }
   fetchWaybillHandler = () => {
     const dataJson = JSON.stringify(this.props.form.getFieldValue('waybill'))
@@ -45,7 +46,8 @@ export default class MilkPowderHandler extends PureComponent {
   }
   valueHandler = (values) => {
     const { ID } = this.props.order
-    const newValues = { ...values, ...this.props.order }
+    const { selectedList, ...restOrder } = this.props.order
+    const newValues = { ...values, ...restOrder, waybill: selectedList }
     const valuesJson = JSON.stringify(newValues)
     const payload = {
       orderID: ID,
@@ -53,30 +55,23 @@ export default class MilkPowderHandler extends PureComponent {
     }
     this.props.dispatch({ type: 'commodity/submitOrder', payload })
   }
-  render() {
-    const { form, order, dispatch } = this.props;
-    const { getFieldDecorator, validateFieldsAndScroll, getFieldsError } = form;
-    const { selectedList } = order || []
-    const waybillRequiredFiltered = selectedList.filter(item => item.Sku.includes('CGF') || item.Sku.includes('YDF'))
-    const waybillUnRequiredFiltered = selectedList.filter(item => !item.Sku.includes('CGF') && !item.Sku.includes('YDF'))
-    let selectedListForWaybill = []
-    waybillRequiredFiltered.forEach(item => {
-      for (let i=0; i<item.Count; i++) {
-        selectedListForWaybill.push({
-          ...item, Key: `${item.Sku}-${i}`, Count: 1
-        })
-      }
-    })
-    selectedListForWaybill = [ ...selectedListForWaybill, ...waybillUnRequiredFiltered ]
-    const extraNodeForFetchWaybill = (
-      <a onClick={() => this.fetchWaybillHandler()}>抓取订单号</a>
-    )
-    const validate = () => {
-      validateFieldsAndScroll((error, values) => {
+  validate = () => {
+      this.props.form.validateFieldsAndScroll((error, values) => {
         if (!error) {
+          console.log(values)
         this.valueHandler(values)
         }
       });
+  }
+  render() {
+    const { form, order, dispatch } = this.props;
+    const { getFieldDecorator, validateFieldsAndScroll, getFieldsError } = form;
+    const { shippingData } = order || []
+    console.log('shippingData', shippingData)
+    const newShippingData = shippingData.map(item => ({
+      ...item, Name: item.Name.Name
+    }))
+    const validate = () => {
     };
     const errors = getFieldsError();
     const getErrorInfo = () => {
@@ -118,21 +113,26 @@ export default class MilkPowderHandler extends PureComponent {
       );
     };
 
+    const priceListNode = (
+      <div></div>
+
+    )
+
     return (
       <div>
-        <Card title="抓取运单号" bordered={false} style={{marginBottom: 24}} extra={extraNodeForFetchWaybill}>
-        {getFieldDecorator('waybill', {
-          initialValue: selectedListForWaybill,
-          rules: [{ validator: this.checkWaybill }]
-        })(
-          <TableForm />
-        )}
+        <Card title="包裹管理" bordered={false} style={{marginBottom: 24}} >
+            {getFieldDecorator('shippingData', {
+              initialValue: newShippingData,
+              rules: [{ validator: this.checkShippingData }]
+            })(
+              <TableForm dispatch={dispatch} />
+              )}
         </Card>
-        <Card title="奶粉下单地址"  bordered={false} style={{marginBottom: 24}}>
+        <Card title="代发下单地址"  bordered={false} style={{marginBottom: 24}}>
           <Form layout="vertical">
             <Row gutter={16}>
               <Col lg={8} md={12} sm={24}>
-                <Form.Item label={fieldLabels.senderName}>
+                <Form.Item label={fieldLabels.SenderName}>
                   {getFieldDecorator('SenderName', {
                     rules: [{ required: true, message: '请输入寄件人姓名' }],
                   })(
@@ -141,7 +141,7 @@ export default class MilkPowderHandler extends PureComponent {
                 </Form.Item>
               </Col>
               <Col lg={{ span: 8 }} md={{ span: 12 }} sm={24}>
-                <Form.Item label={fieldLabels.senderPhoneNumber}>
+                <Form.Item label={fieldLabels.SenderPhoneNumber}>
                   {getFieldDecorator('SenderPhoneNumber', {
                     rules: [{ required: true, message: '请输入寄件人电话' }],
                   })(
@@ -152,7 +152,7 @@ export default class MilkPowderHandler extends PureComponent {
             </Row>
             <Row gutter={16}>
               <Col lg={{ span: 8 }} md={{ span: 12 }} sm={24}>
-                <Form.Item label={fieldLabels.receiverName}>
+                <Form.Item label={fieldLabels.ReceiverName}>
                   {getFieldDecorator('ReceiverName', {
                     rules: [{ required: true, message: '请输入收件人姓名' }],
                   })(
@@ -161,7 +161,7 @@ export default class MilkPowderHandler extends PureComponent {
                 </Form.Item>
               </Col>
               <Col lg={8} md={12} sm={24}>
-                <Form.Item label={fieldLabels.receiverPhoneNumber}>
+                <Form.Item label={fieldLabels.ReceiverPhoneNumber}>
                   {getFieldDecorator('ReceiverPhoneNumber', {
                     rules: [{ required: true, message: '请输入收件人电话' }],
                   })(
@@ -170,7 +170,7 @@ export default class MilkPowderHandler extends PureComponent {
                 </Form.Item>
               </Col>
               <Col lg={{ span: 8 }} md={{ span: 12 }} sm={24}>
-                <Form.Item label={fieldLabels.receiverIDNumber}>
+                <Form.Item label={fieldLabels.ReceiverIDNumber}>
                   {getFieldDecorator('ReceiverIDNumber', {
                     rules: [{ required: true, message: '请输入收件人身份证号' }],
                   })(
@@ -181,7 +181,7 @@ export default class MilkPowderHandler extends PureComponent {
             </Row>
             <Row gutter={16}>
               <Col lg={{ span: 12 }} md={{ span: 24 }} sm={24}>
-                <Form.Item label={fieldLabels.receiverAddress}>
+                <Form.Item label={fieldLabels.ReceiverAddress}>
                   {getFieldDecorator('ReceiverAddress', {
                     rules: [{ required: true, message: '选择收件人地址' }],
                   })(
@@ -190,7 +190,7 @@ export default class MilkPowderHandler extends PureComponent {
                 </Form.Item>
               </Col>
               <Col lg={{ span: 12 }} md={{ span: 24 }} sm={24}>
-                <Form.Item label={fieldLabels.receiverDetailedAddress}>
+                <Form.Item label={fieldLabels.ReceiverDetailedAddress}>
                   {getFieldDecorator('ReceiverDetailedAddress', {
                     rules: [{ required: true, message: '请输入收件人详细地址（具体到门牌号）' }],
                   })(
@@ -203,7 +203,7 @@ export default class MilkPowderHandler extends PureComponent {
         </Card>
         <FooterToolbar style={{ width: '100%' }}>
           {getErrorInfo()}
-          <Button type="primary" onClick={validate} >
+          <Button type="primary" onClick={this.validate} extra={priceListNode} >
             提交
           </Button>
         </FooterToolbar>

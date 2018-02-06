@@ -5,10 +5,11 @@ import { Button, Badge, Row, Col, Icon, Table, Radio, List, Card, Divider } from
 import styles from './index.less';
 import Pay from './Pay';
 import ExpressHandler from '../ExpressHandler';
-import { POS_TAB_TYPE } from '../../../constant';
+import { POS_TAB_TYPE, POS_PHASE } from '../../../constant';
 import Print from 'rc-print';
 import MilkPowderHandler from './MilkPowderHandler/';
-import SaleHandler from './SaleHandler';
+import StoreSaleHandler from './StoreSaleHandler';
+import StoreWholeSaleHandler from './StoreWholeSaleHandler/'
 import DescriptionList from '../../../components/DescriptionList';
 // import WareHouse from './WareHouse';
 
@@ -28,7 +29,11 @@ export default class Payment extends PureComponent {
     };
   }
   handlePrevClick = () => {
-    this.props.dispatch(routerRedux.goBack());
+    // this.props.dispatch(routerRedux.goBack());
+    const activeTabKey = this.props.activeTabKey
+    const lastPhase = POS_PHASE.PAY
+    const targetPhase = POS_PHASE.LIST
+    this.props.dispatch({type: 'commodity/changePosPhase', payload: { activeTabKey, lastPhase, targetPhase }})
   }
   validate = (bool) => {
     this.setState({
@@ -37,23 +42,27 @@ export default class Payment extends PureComponent {
   }
   render() {
     const { dispatch } = this.props;
-    const { goodsPrice, expressCost, totalPrice, saleType, realMoney, changeMoney, type } = this.props.order;
+    const { goodsPrice, expressCost, shippingCost, totalPrice, saleType, realMoney, changeMoney, type, ID, createTime, } = this.props.order;
     const priceList = [
       { title: '商品金额', value: goodsPrice },
-      { title: '邮费金额', value: expressCost },
+      { title: '直邮金额', value: expressCost },
+      { title: '代发金额', value: shippingCost },
       { title: '应收金额', value: totalPrice },
       { title: '实收金额', value: realMoney },
       { title: '找零金额', value: changeMoney },
     ];
 
 
-    const generateContent = () => {
+    const generateContent = (priceList) => {
       switch (type) {
-        case POS_TAB_TYPE.SALE: {
-          return <SaleHandler saleType={saleType} dispatch={dispatch} />
+        case POS_TAB_TYPE.STORESALE: {
+          return <StoreSaleHandler saleType={saleType} dispatch={dispatch} priceList={priceList} />
         }
         case POS_TAB_TYPE.MILKPOWDER: {
           return <MilkPowderHandler />
+        }
+        case POS_TAB_TYPE.WHOLESALE: {
+          return <StoreWholeSaleHandler />
         }
         default:
           return null
@@ -89,14 +98,14 @@ export default class Payment extends PureComponent {
             </Col>
           </Row>
           <Card title="订单信息" style={{ marginBottom: 24 }} extra={<a>选择或新建客户</a>}>
-            <DescriptionList>
-              <Description term="订单号">32943898021309809423</Description>
+            <DescriptionList size="small"  title="基本信息">
+              <Description term="订单号">{ID}</Description>
               <Description term="订单类型">门店销售/本地</Description>
-              <Description term="下单时间">2017-07-07</Description>
+              <Description term="下单时间">{createTime}</Description>
             </DescriptionList>
             <Divider style={{ margin: '16px 0' }} />
             {/* <Card type="inner" title="多层级信息组"> */}
-            <DescriptionList size="small" style={{ marginBottom: 16 }} title="客户信息">
+            <DescriptionList size="small" title="客户信息">
               <DescriptionList>
                 <Description term="客户名">付小小</Description>
                 <Description term="会员卡号">32943898021309809423</Description>
@@ -108,22 +117,12 @@ export default class Payment extends PureComponent {
             {/* </Card> */}
 
           </Card>
-          {generateContent()}
+          {generateContent(priceList)}
           <Pay
             totalPrice={goodsPrice}
             validate={this.validate}
           />
         </div>
-        <List
-          dataSource={priceList}
-          className={styles.priceList}
-          renderItem={item => (
-            <div className={styles.priceListItem}>
-              <h2>{item.title}:</h2>
-              <h2>{item.value}</h2>
-            </div>
-          )}
-        />
       </div>
     );
   }

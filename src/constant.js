@@ -4,14 +4,28 @@ export const GOODS_DISPLAY_TYPE = {
 };
 
 export const POS_TAB_TYPE = {
-  SALE: 'SALE',
+  STORESALE: 1,
+  MILKPOWDER: 2,
+  WHOLESALE: 3,
   ALLOCATEANDTRANSFER: 'ALLOCATEANDTRANSFER',
   RETURNSALE: 'RETURNSALE',
-  MILKPOWDER: 2,
-  WHOLESALE: 'WHOLESALE',
 };
 
+export const SALE_TYPE = {
+  LOCAL: 1,
+  EXPRESS: 2,
+  SHIPPING: 3,
+}
 
-export const DOMAIN = 'http://192.168.1.225:8086';
+
+// export const DOMAIN = 'http://192.168.1.225:8086';
+export const DOMAIN = 'http://testposapi.he2009.nz';
+
+export const POS_PHASE = {
+  LIST: 'CHOOSE_LIST',
+  TABLE: 'CHOOSE_TABLE',
+  PAY: 'PAY',
+  CUSTOMER: 'CUSTOMER',
+}
 
 
