@@ -110,6 +110,12 @@ export const getNavData = app => [
         path: 'allocateAndTransfer',
         component: dynamicWrapper(app, ['commodity'], () => import('../routes/Allocate/AllocateTable')),
       },
+      {
+        name: '快递管理',
+        icon: 'rocket',
+        path: 'express',
+        component: dynamicWrapper(app, ['express'], () => import('../routes/Express/Componany')),
+      },
       // {
       //   name: 'Dashboard',
       //   icon: 'dashboard',

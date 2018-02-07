@@ -78,6 +78,33 @@ export async function submitOrder({ orderID, dataJson }) {
   return request(`${DOMAIN}/Order/Commit`, options)
 }
 
+// 快递公司管理-添加
+export async function addCompany({ Name, Sign, Price }) {
+  let options = {
+    body: `Name=${Name}&Sign=${Sign}&Price=${Price}`,
+  }
+  return request(`${DOMAIN}/LogisticsCompany/Add`, options)
+}
+// 快递公司管理-删除
+export async function deleteCompany(ID) {
+  let options = {
+    body: `ID=${ID}`,
+  }
+  return request(`${DOMAIN}/LogisticsCompany/Delete`, options)
+}
+// 快递公司管理-更新
+export async function updateCompany({ ID, Name, Sign, Price }) {
+  let options = {
+    body: `ID=${ID}&Name=${Name}&Sign=${Sign}&Price=${Price}`,
+  }
+  return request(`${DOMAIN}/LogisticsCompany/Update`, options)
+}
+// 快递公司管理-查询
+export async function getCompany() {
+  let options = {}
+  return request(`${DOMAIN}/LogisticsCompany/GetAll`, options)
+}
+
 export async function fetchCommodityList() {
   return request('api/getCommodity');
 }

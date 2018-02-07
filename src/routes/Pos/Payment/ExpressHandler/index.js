@@ -1,35 +1,3 @@
-// import React, { PureComponent } from 'react';
-// import { connect } from 'dva';
-// import { Row, Col, Card, Form, Input, Select, Icon, Button, Dropdown, Menu, InputNumber, DatePicker, Modal, message, Table, Radio } from 'antd';
-// import styles from './index.less';
-// import TableForm from './TableForm';
-
-// @connect(state => ({
-//   commodity: state.commodity,
-//   order: state.commodity.orders.filter(item => item.key === state.commodity.activeTabKey)[0],
-//   activeTabKey: state.commodity.activeKey,
-// }))
-
-// @Form.create()
-
-// export default class Express extends PureComponent {
-//   render() {
-//     const { dispatch, order, form } = this.props;
-//     const { goodsPrice } = order;
-//     const { getFieldDecorator, getFieldsError } = form;
-//     return (
-//       <div className={styles.expressWrapper}>
-//         {getFieldDecorator('waybill', {
-//           initialValue: order.expressData,
-//           rules: [{ validator: this.checkWaybill }]
-//         })(
-//           <TableForm dispatch={dispatch} />
-//         )}
-//       </div>
-//     );
-//   }
-// }
-
 import React, { PureComponent } from 'react';
 import { Card, Form, Input, Row, Col, Cascader, Button, Icon, Popover } from 'antd'
 import { connect } from 'dva';
