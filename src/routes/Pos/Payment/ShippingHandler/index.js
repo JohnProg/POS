@@ -22,6 +22,7 @@ const fieldLabels = {
 @connect(state => ({
   order: state.commodity.orders.filter(item => item.key === state.commodity.activeTabKey)[0],
   activeTabKey: state.commodity.activeTabKey,
+  express: state.express,
 }))
 
 
@@ -58,7 +59,6 @@ export default class ShippingHandler extends PureComponent {
   validate = () => {
       this.props.form.validateFieldsAndScroll((error, values) => {
         if (!error) {
-          console.log(values)
         this.valueHandler(values)
         }
       });
@@ -67,7 +67,6 @@ export default class ShippingHandler extends PureComponent {
     const { form, order, dispatch } = this.props;
     const { getFieldDecorator, validateFieldsAndScroll, getFieldsError } = form;
     const { shippingData } = order || []
-    console.log('shippingData', shippingData)
     const newShippingData = shippingData.map(item => ({
       ...item, Name: item.Name.Name
     }))
@@ -125,7 +124,7 @@ export default class ShippingHandler extends PureComponent {
               initialValue: newShippingData,
               rules: [{ validator: this.checkShippingData }]
             })(
-              <TableForm dispatch={dispatch} />
+              <TableForm dispatch={dispatch} express={this.props.express}  />
               )}
         </Card>
         <Card title="代发下单地址"  bordered={false} style={{marginBottom: 24}}>

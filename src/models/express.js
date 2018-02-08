@@ -15,7 +15,6 @@ export default {
         payload: true,
       });
       const response = yield call(addCompany, payload);
-      console.log('add', response)
       yield put({type: 'getCompany'})
       yield put({
         type: 'changeLoading',
@@ -53,7 +52,6 @@ export default {
       });
       const response = yield call(getCompany);
       const expressList = response.Result.Data
-      console.log(expressList)
       const payload = Array.isArray(expressList) ? expressList : []
       yield put({
         type: 'saveExpressList',

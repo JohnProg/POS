@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import { Table, Input, InputNumber } from 'antd';
 import { calculateExpressOrShippingCost } from '../../../../utils/utils';
+import SearchableSelect from './SearchableSelect';
 
 export default class TableForm extends PureComponent {
   handleFieldChange = (e, fieldName, key) => {
@@ -19,10 +20,16 @@ export default class TableForm extends PureComponent {
     this.props.dispatch({ type: 'commodity/changeShippingDataAndSumCost', payload: shippingData })
   }
   render() {
+    const { express, dispatch } = this.props
+    const getCompany = () => dispatch({type: 'express/getCompay'})
     const columns = [{
       title: '快递公司',
       dataIndex: 'Name',
-      render: (text, record) => <Input value={text} onChange={e => this.handleFieldChange(e, 'Name', record.ID)} />,
+      render: (text, record) => (
+        <SearchableSelect
+         />
+      //  <Input value={text} onChange={e => this.handleFieldChange(e, 'Name', record.ID)} />
+      ),
     }, {
       title: '重量',
       dataIndex: 'Weight',

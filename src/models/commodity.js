@@ -543,6 +543,7 @@ export default {
       }
       if (saleType === SALE_TYPE.SHIPPING) {
         yield put({type: 'changeExpressDataAndSumCost', payload: []})
+        yield put({type: 'changeShippingDataAndSumCost', payload: [{ Name: {Name: '', ID: ''}, Weight: 0, WeightedWeight: 0.3, UnitPrice: 0, RealPrice: 0, InvoiceNo: '', ID: 0, }]})
       }
       const { orders, activeTabKey } = yield select(state => state.commodity);
       const currentOrder = orders.filter(item => (item.key === activeTabKey))[0];

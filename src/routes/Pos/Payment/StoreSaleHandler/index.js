@@ -29,7 +29,6 @@ export default class SaleHander extends PureComponent {
   }
   render() {
     const { saleType, dispatch, priceList } = this.props
-    console.log(priceList)
     const priceListNode = (
       <div style={{width: '100%'}}>
         {
